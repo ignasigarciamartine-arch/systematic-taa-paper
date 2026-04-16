@@ -1,0 +1,61 @@
+% ============================================================
+% SECTION 4: Results
+% Status: DRAFT — to be written
+% Numbers from: 01_TFM/redaccion/RESULTS.md (source of truth)
+% ============================================================
+
+\section{Results}
+\label{sec:results}
+
+% ---- 4.1 In-Sample Performance (Train: 2008–2019) ----
+% Strategy evolution table (Table X):
+%   Base momentum (13612U, θ=2%):  CAGR 7.64%, Sharpe 0.762, MaxDD -13.28%
+%   + Enhanced Defensive (TLT+IEF): CAGR 9.72%, Sharpe 0.891, MaxDD -13.87%
+%   + Crash Filter (τ=-4%):         CAGR 10.88%, Sharpe 0.991, MaxDD -13.87%
+%   60/40 benchmark:                CAGR ~7%, MaxDD ~-29%
+% Interpretation: each layer adds value; crash filter most impactful
+
+% ---- 4.2 Crash Filter Threshold Sensitivity ----
+% Table: τ ∈ {-2%...-5%} → CAGR, Sharpe, MaxDD, #crashes
+% τ=-4% is a robust choice: flat optimum between -4% and -5%
+% (Table 9 from RESULTS.md — all numbers verified)
+
+% ---- 4.3 Out-of-Sample Performance (OOS: 2020–2025) ----
+% S3.6 OOS: CAGR 12.05%, Sharpe 1.291, MaxDD -12.52%, 9 crash triggers
+% 60/40 benchmark: CAGR 5.89%, MaxDD -29.24%
+% Key events: COVID crash (Mar 2020), rate hike cycle (2022), Tariff Shock (2025)
+% OOS CAGR > Train CAGR → no sign of overfit in base metrics
+
+% ---- 4.4 Full Period Performance (2008–2025) ----
+% S3.6: CAGR 11.27%, Sharpe 1.081, MaxDD -13.87%, Total Return +571.6%
+% 60/40: CAGR 5.89%, MaxDD -29.24%, Total Return +165%
+% Table: S3.6 vs 60/40 vs B&H EW15
+
+% ---- 4.5 Crisis Period Analysis ----
+% GFC (Jan 2008 – Jun 2009): S3.6 +17.64% vs 60/40 -33% (approx) → 6 crash triggers
+% COVID (Mar 2020 – May 2023): S3.6 +27.43%, lower Sharpe than 60/40 in this window
+% Tariff Shock (Mar–Apr 2025): S3.6 +6.78%, S&P 500 -6.67%, 0 crash triggers
+% Interpretation: strategy excels in sudden crashes; underperforms in prolonged bull
+
+% ---- 4.6 Market Regime Analysis ----
+% Table: BULL/SIDEWAYS/BEAR/CRISIS by SPY momentum
+% S3.6 dominates in SIDEWAYS (+4.90pp) and CRISIS (+6.07pp)
+% S3.6 underperforms in BULL (-2.55pp) — cost of defensive allocation
+% BEAR: 4 months only — not statistically significant
+
+% ---- 4.7 Monte Carlo Robustness ----
+% Method: circular block bootstrap, block=6m, N=10,000, seed=42
+% S3.6 median CAGR: 7.09% | 60/40 median: ~5%
+% P10/P50/P90: 2.59% / 7.09% / 12.18%
+% Honest limitation: median degrades from 10.88% historical → sequencing dependency
+% Fan chart figure
+
+% ---- 4.8 UCITS Implementation ----
+% Phase 3 results (Mar 2019 – Mar 2026): CAGR 12.71% gross / 12.35% net (IBKR)
+% UCITS vs USA same period: virtually identical CAGR, minor tracking difference
+% Practical implication: strategy is implementable in European regulatory framework
+
+% TODO: write full results section ~2,500 words.
+% Tables: use \begin{table}[H]\centering\begin{tabular}{...}\toprule...\bottomrule
+
+\end{document}

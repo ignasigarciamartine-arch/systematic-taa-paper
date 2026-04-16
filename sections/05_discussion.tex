@@ -1,0 +1,49 @@
+% ============================================================
+% SECTION 5: Discussion
+% Status: DRAFT — to be written
+% ============================================================
+
+\section{Discussion}
+\label{sec:discussion}
+
+% ---- 5.1 Why crash detection adds value ----
+% The key insight: crash filter triggers defensiveness BEFORE momentum signal
+% degrades fully. In GFC 2008: 6 early triggers → +17.64% vs -33% for 60/40
+% Mechanism: avg market breadth < -4% is a coincident indicator, not lagging
+% Compare to pure momentum strategies that stay offensive until losses accumulate
+
+% ---- 5.2 The cost of protection ----
+% BULL regime underperformance (-2.55pp vs 60/40? — check numbers): opportunity cost
+% 84.5% of time in offensive mode → strategy is not overly conservative
+% Drawdown constraint is met: MaxDD -13.87% < -15% hard limit
+% Corporate treasury interpretation: acceptable cost for capital preservation mandate
+
+% ---- 5.3 OOS stability and generalization ----
+% OOS CAGR (12.05%) > Train CAGR (10.88%): not guaranteed to persist
+%   → 2020–2025 coincided with high market volatility + bond bull market revival
+% The key evidence: crash filter activated correctly in COVID (9 triggers)
+%   and did NOT false-trigger in the prolonged 2021 recovery (no unnecessary exits)
+
+% ---- 5.4 Monte Carlo: honest limitations ----
+% P(strategy CAGR > 60/40 in bootstrap) = high (estimate — need to compute)
+% P(strategy outperforms some other TAA) much lower
+% Main insight: historical outperformance is path-dependent on 2008 crisis sequence
+% This is a fundamental limitation of all backtested TAA strategies, not specific here
+% Corporate framing: the guarantee is the drawdown cap, not the CAGR level
+
+% ---- 5.5 Transaction costs ----
+% Phase 3 IBKR analysis: drag ~0.36 pp/year
+% Net CAGR (conservative): 11.27% - 0.36pp ≈ 10.9% — still well above 7% target
+% Number of trades per year: ~avg 3 rebalancings/month × 12 → ~36 transactions/year
+% At IBKR: 0.35 bp per ETF trade → minimal drag
+
+% ---- 5.6 Practical implementation ----
+% Monthly rebalancing: compatible with corporate treasury workflow
+% No leverage, no derivatives: straightforward ETF execution
+% UCITS availability: full implementation feasible for EU-domiciled entities
+% Automation: fully rule-based → zero discretion once system is live
+
+% TODO: write ~1,500 words. The discussion must be honest about limitations
+% while making the corporate treasury framing clear.
+
+\end{document}
