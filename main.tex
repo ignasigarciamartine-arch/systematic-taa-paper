@@ -1,29 +1,28 @@
 % ============================================================
-% PAPER: Systematic TAA for Corporate Cash Management
-% Authors: Garcia Martin, I. · Mases Campos, M. · Prior Sanz, F.
-% Target: Journal of Empirical Finance (primary)
-%         International Review of Economics and Finance (backup)
-% Template: elsarticle (Elsevier standard)
+% Systematic Tactical Asset Allocation for Corporate Cash Management
+% Authors: Garcia Martin I., Mases Campos M., Prior Sanz F.
+% Institution: IQS School of Engineering, Universitat Ramon Llull
+% Target: Journal of Empirical Finance (Elsevier, Q1)
+% Template: elsarticle
 % ============================================================
 
-\documentclass[preprint,12pt]{elsarticle}
+\documentclass[preprint,12pt,authoryear]{elsarticle}
 
-% --- Packages ---
 \usepackage{amsmath, amssymb}
 \usepackage{booktabs}
 \usepackage{graphicx}
-\usepackage{hyperref}
-\usepackage{natbib}
+\usepackage[hidelinks]{hyperref}
 \usepackage{float}
 \usepackage{longtable}
 \usepackage{multirow}
-\usepackage{lmodern}
+\usepackage{array}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{lineno}
 
-% --- Bibliography style (Elsevier author-year) ---
-\bibliographystyle{elsarticle-harv}
+\journal{Journal of Empirical Finance}
 
 % ============================================================
 \begin{document}
@@ -32,27 +31,47 @@
 
 \title{A Systematic Tactical Asset Allocation Strategy for Corporate Cash Management: Momentum, Crash Detection, and Drawdown Control}
 
-% Authors — order TBD
 \author[iqs]{Ignasi Garcia Martin}
 \author[iqs]{Marc Mases Campos}
-\author[iqs]{Francesc Prior Sanz}
+\author[iqs]{Francesc Prior Sanz\corref{cor}}
+\cortext[cor]{Corresponding author}
+\address[iqs]{IQS School of Engineering, Universitat Ramon Llull, Via Augusta 390, 08017 Barcelona, Spain}
 
-\address[iqs]{IQS School of Engineering, Universitat Ramon Llull, Barcelona, Spain}
-
+% ---- Abstract -----------------------------------------------
 \begin{abstract}
-% TODO: write abstract after results section is finalized
+We design and evaluate a fully automated tactical asset allocation (TAA) strategy
+targeting corporate cash management, where the primary constraint is preserving
+capital against severe drawdowns while achieving returns above inflation.
+The strategy combines multi-period momentum scoring, minimum-correlation
+portfolio selection, and a market-breadth crash filter to dynamically rotate
+across a diversified universe of 15 exchange-traded funds (ETFs) on a monthly basis.
+
+Backtested over 2008--2025 using a strict train/out-of-sample split
+(2008--2019 / 2020--2025), the strategy achieves a compound annual growth rate (CAGR)
+of 11.27\% with a maximum drawdown of $-13.87$\% over the full period,
+satisfying the hard corporate constraint of $\text{MaxDD} < -15\%$.
+Out-of-sample performance (CAGR 12.05\%) confirms in-sample results.
+During the Global Financial Crisis (2008--2009), the strategy returns $+17.64\%$
+while equities lose more than 33\%.
+A European UCITS implementation achieves virtually identical performance
+(CAGR 12.35\% net of commissions, 2019--2026), confirming cross-market applicability.
+
+Our results contribute to the growing literature on systematic, rule-based TAA
+by demonstrating that momentum-based rotation with an explicit crash detection
+mechanism can deliver equity-like returns within corporate treasury risk constraints,
+without recourse to leverage or derivatives.
 \end{abstract}
 
 \begin{keyword}
-Tactical asset allocation \sep momentum \sep drawdown control \sep corporate treasury \sep crash detection \sep ETF
+Tactical asset allocation \sep momentum \sep drawdown control \sep
+corporate treasury \sep crash detection \sep ETF rotation \sep out-of-sample
 \end{keyword}
 
 \end{frontmatter}
 
-% ============================================================
-% SECTIONS
-% ============================================================
+%\linenumbers  % uncomment for review submission
 
+% ============================================================
 \input{sections/01_introduction}
 \input{sections/02_literature}
 \input{sections/03_methodology}
@@ -60,9 +79,7 @@ Tactical asset allocation \sep momentum \sep drawdown control \sep corporate tre
 \input{sections/05_discussion}
 \input{sections/06_conclusion}
 
-% ============================================================
-% BIBLIOGRAPHY
-% ============================================================
+\bibliographystyle{elsarticle-harv}
 \bibliography{paper}
 
 \end{document}
