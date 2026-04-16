@@ -1,49 +1,158 @@
 % ============================================================
-% SECTION 5: Discussion
-% Status: DRAFT — to be written
-% ============================================================
-
 \section{Discussion}
 \label{sec:discussion}
+% ============================================================
 
-% ---- 5.1 Why crash detection adds value ----
-% The key insight: crash filter triggers defensiveness BEFORE momentum signal
-% degrades fully. In GFC 2008: 6 early triggers → +17.64% vs -33% for 60/40
-% Mechanism: avg market breadth < -4% is a coincident indicator, not lagging
-% Compare to pure momentum strategies that stay offensive until losses accumulate
+\subsection{Why the Crash Filter Adds Value}
 
-% ---- 5.2 The cost of protection ----
-% BULL regime underperformance (-2.55pp vs 60/40? — check numbers): opportunity cost
-% 84.5% of time in offensive mode → strategy is not overly conservative
-% Drawdown constraint is met: MaxDD -13.87% < -15% hard limit
-% Corporate treasury interpretation: acceptable cost for capital preservation mandate
+The central result of this paper is that the market-breadth crash filter generates
+the largest single performance increment (Table~\ref{tab:evolution}), yet the mechanism
+is not momentum itself but the absence of momentum continuation during broad market dislocations.
+When the equal-weighted average return of the full 15-asset universe falls below $-4\%$
+in a single month, the filter diverts capital to the enhanced defensive allocation before
+the momentum signal has time to degrade.
 
-% ---- 5.3 OOS stability and generalization ----
-% OOS CAGR (12.05%) > Train CAGR (10.88%): not guaranteed to persist
-%   → 2020–2025 coincided with high market volatility + bond bull market revival
-% The key evidence: crash filter activated correctly in COVID (9 triggers)
-%   and did NOT false-trigger in the prolonged 2021 recovery (no unnecessary exits)
+This distinction matters.
+A pure cross-sectional momentum strategy exits losing assets only after they have
+lost sufficient relative rank; this typically lags a crash by one or two months.
+In contrast, the market-breadth filter is a coincident indicator: it fires in the same
+month that broad market stress materialises, well before individual asset momentum
+scores reflect the change in regime.
+During the Global Financial Crisis, the filter triggered six times across the
+January 2008 -- June 2009 window; each trigger redirected capital to TLT and IEF,
+which appreciated as investors fled equities for government bonds.
+The result was a cumulative gain of $+17.64\%$ during a period when the S\&P 500
+lost $-33.05\%$ (Table~\ref{tab:crisis}).
 
-% ---- 5.4 Monte Carlo: honest limitations ----
-% P(strategy CAGR > 60/40 in bootstrap) = high (estimate — need to compute)
-% P(strategy outperforms some other TAA) much lower
-% Main insight: historical outperformance is path-dependent on 2008 crisis sequence
-% This is a fundamental limitation of all backtested TAA strategies, not specific here
-% Corporate framing: the guarantee is the drawdown cap, not the CAGR level
+The crash filter also performed correctly in the 2020 COVID episode.
+It triggered nine times over the March 2020 -- May 2023 window,
+capturing the initial equity collapse (March--April 2020) and several
+subsequent volatility spikes, while not over-triggering during the prolonged
+2020--2021 recovery rally.
+This asymmetry---defensive in crashes, offensive in recoveries---is precisely the
+property required for a corporate treasury mandate.
 
-% ---- 5.5 Transaction costs ----
-% Phase 3 IBKR analysis: drag ~0.36 pp/year
-% Net CAGR (conservative): 11.27% - 0.36pp ≈ 10.9% — still well above 7% target
-% Number of trades per year: ~avg 3 rebalancings/month × 12 → ~36 transactions/year
-% At IBKR: 0.35 bp per ETF trade → minimal drag
+\subsection{The Cost of Capital Protection}
 
-% ---- 5.6 Practical implementation ----
-% Monthly rebalancing: compatible with corporate treasury workflow
-% No leverage, no derivatives: straightforward ETF execution
-% UCITS availability: full implementation feasible for EU-domiciled entities
-% Automation: fully rule-based → zero discretion once system is live
+Protection is not free.
+The regime analysis (Table~\ref{tab:regimes}) shows that the strategy underperforms
+the 60/40 benchmark by $-2.49$ pp in BULL regimes, which account for 55.7\% of
+the 2008--2025 sample.
+This underperformance stems from the absolute momentum threshold ($\theta = 2\%$):
+when assets with positive but modest momentum scores fall below the threshold,
+the portfolio shifts partially to defensive assets, missing the upside of
+a sustained risk-on rally.
 
-% TODO: write ~1,500 words. The discussion must be honest about limitations
-% while making the corporate treasury framing clear.
+Two observations mitigate this cost.
+First, the strategy remains in offensive mode the majority of the time: the
+overall defensive allocation rate is approximately 16\% of all months,
+and 94\% in BULL regimes.
+Second, and more fundamentally, the design objective is not to maximise
+CAGR unconditionally but to satisfy a hard drawdown constraint of $-15\%$
+while delivering returns above a 7\% corporate threshold.
+The strategy achieves both: full-period CAGR of 11.27\% and maximum
+drawdown of $-13.87\%$ throughout the entire 2008--2025 period.
+The BULL-regime underperformance is the actuarial premium paid
+for downside protection.
 
-\end{document}
+\subsection{Out-of-Sample Stability}
+
+The OOS CAGR of 12.05\% marginally exceeds the in-sample CAGR of 10.88\%.
+This result should not be over-interpreted: it reflects the specific character
+of the 2020--2025 period, which combined high equity volatility
+(COVID crash, 2022 inflation shock, 2025 tariff shock) with periodic
+flight-to-quality episodes---exactly the conditions where the strategy's
+architecture is most advantageous.
+
+More meaningful is the absence of performance degradation.
+In the TAA literature, OOS decay relative to in-sample is a standard finding
+\citep{harvey2016}, driven by overfitting, data-mining bias, and regime change.
+The fact that crash-filter triggers in the OOS period (9 times)
+align with genuine stress events---not false positives in benign markets---
+is qualitative evidence that the filter captures a persistent economic mechanism
+rather than an in-sample artefact.
+
+The robustness evidence from the threshold sensitivity analysis
+(Table~\ref{tab:threshold_sensitivity}) reinforces this interpretation:
+performance is broadly flat over a $\pm 1$ pp band around the selected
+threshold of $-4.0\%$, implying that the chosen value is not a sharp optimum
+fitted to historical crashes.
+
+\subsection{Monte Carlo: Honest Appraisal of Uncertainty}
+
+The circular block bootstrap results (Table~\ref{tab:montecarlo}) reveal
+a meaningful gap between the historical CAGR (11.27\%) and the bootstrap
+median (7.09\%).
+This gap is not evidence against the strategy; it is evidence of path dependence.
+The historical sequence---a deep crisis followed by a prolonged bond rally,
+followed by a recovery, followed by another volatility regime---was
+unusually favourable for a crash-detection strategy.
+By scrambling that sequence, the bootstrap produces a range of plausible
+alternative histories in which the strategy performs more modestly.
+
+Two aspects of the bootstrap distribution deserve attention for the
+corporate treasury context.
+The 10th percentile CAGR of 2.59\% remains positive, suggesting
+the strategy avoids destruction of capital across a wide range of
+simulated environments.
+More importantly, the bootstrap does not model the drawdown path:
+the strategy's downside control comes from the crash filter,
+which activates unconditionally whenever the breadth signal is triggered,
+regardless of the broader return sequence.
+For a corporate treasurer, the relevant guarantee is the drawdown cap,
+not the CAGR realisation---and that guarantee is structural rather than
+statistical.
+
+\subsection{Transaction Costs and Practical Feasibility}
+
+The base backtest reports gross performance, consistent with the
+academic convention for systematic strategy evaluation.
+The UCITS analysis provides a clean estimate of transaction cost impact:
+using Interactive Brokers fee schedules (fixed rate of \$0.005 per share,
+minimum \$1.00 per order), commission drag is approximately 0.36 pp per annum,
+reducing the gross CAGR of 12.71\% (UCITS, March 2019--March 2026)
+to approximately 12.35\% net.
+
+Applying the same drag estimate to the full-period results yields a net CAGR
+of approximately 10.91\%, which remains comfortably above the 7\% corporate
+return target.
+The modest drag reflects the monthly rebalancing frequency and the concentrated
+three-asset portfolio, which require fewer transactions per period than
+daily-rebalanced or broadly diversified strategies.
+Tax treatment and custody fees are not modelled and would reduce
+net returns further; their magnitude depends on entity type and jurisdiction
+and is beyond the scope of this paper.
+
+\subsection{Limitations}
+
+Several limitations bound the interpretation of these results.
+
+\textit{Backtest overfitting.}
+All parameters---including the crash threshold $\tau = -4\%$, the absolute
+momentum cutoff $\theta = 2\%$, the top-$N=7$ filter, and the triplet selection
+rule---were optimised or selected within the training period.
+Although the strict temporal OOS split mitigates the most direct form of
+look-ahead bias, the researcher degrees of freedom in choosing the strategy
+architecture are not accounted for by the OOS evaluation alone.
+A fully out-of-sample validation would require live performance data, which is
+not yet available for the full strategy specification.
+
+\textit{Survivorship and selection bias.}
+The ETF universe was selected retrospectively from instruments available
+throughout the full sample period.
+ETFs with short histories or poor liquidity that might have been considered
+at the time are excluded by construction.
+This introduces a mild upward bias in the estimated opportunity set.
+
+\textit{Small BEAR regime sample.}
+The BEAR regime classification contains only four months
+(Table~\ref{tab:regimes}), which is insufficient for statistical inference.
+The reported CAGR of $-30.28\%$ for the strategy in that regime reflects
+very few and specific observations and should not be extrapolated.
+
+\textit{Fixed investment universe.}
+The strategy does not adapt its asset universe over time.
+New ETFs (factor tilts, digital assets, UCITS bond alternatives) that become
+liquid during the backtest window are not eligible by construction.
+Universe drift over a live multi-year implementation period is a practical
+risk not captured in the simulation.
