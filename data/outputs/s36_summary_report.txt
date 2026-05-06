@@ -3,29 +3,29 @@ S3.6 BACKTEST REPORT
 
 TRAIN (2008-2019)
 ----------------------------------------
-  CAGR:       10.88%
-  Sharpe:     0.991
-  Sortino:    1.633
-  Max DD:     -13.87%
-  Win Rate:   61.97%
-  Final Cap:  $33,930
+  CAGR:       10.94%
+  Sharpe:     0.951  (rf=3M T-bill)
+  Sortino:    1.776  (rf=3M T-bill)
+  Max DD:     -13.79%
+  Win Rate:   65.49%
+  Final Cap:  $34,149
 
 TEST (2020-2025)
 ----------------------------------------
-  CAGR:       12.05%
-  Sharpe:     1.291
-  Sortino:    2.013
-  Max DD:     -12.52%
-  Win Rate:   72.22%
-  Final Cap:  $19,793
+  CAGR:       12.54%
+  Sharpe:     1.029  (rf=3M T-bill)
+  Sortino:    1.808  (rf=3M T-bill)
+  Max DD:     -10.84%
+  Win Rate:   77.78%
+  Final Cap:  $20,312
 
 FULL (2008-2025)
 ----------------------------------------
-  CAGR:       11.27%
-  Sharpe:     1.081
-  Sortino:    1.745
-  Max DD:     -13.87%
-  Win Rate:   65.42%
-  Final Cap:  $67,159
+  CAGR:       11.47%
+  Sharpe:     0.974  (rf=3M T-bill)
+  Sortino:    1.788  (rf=3M T-bill)
+  Max DD:     -13.79%
+  Win Rate:   69.63%
+  Final Cap:  $69,365
 
 Crash triggers - TRAIN: 12  |  TEST: 9

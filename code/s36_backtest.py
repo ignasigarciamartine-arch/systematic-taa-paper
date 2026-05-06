@@ -14,12 +14,13 @@ Algorithm:
   2. 13612U momentum = (R1m + R3m + R6m + R12m) / 4 → Top-7 → filter ≥ 2%
   3. If |eligible| ≥ 3: select min-correlation triplet (equal weight 1/3 each)
      If |eligible| < 3: defensive
-  Defensive: TLT 50% + IEF 50% if max(mom_TLT, mom_IEF) ≥ 0, else BIL 100%
+  Defensive: TLT 50% + IEF 50% if max(mom_TLT, mom_IEF) ≥ 0, else cash 100%
 
 Data required (place in ../data/prices/):
-  - etf_adjclose_2008_2025.csv         daily adjusted close, 16 ETFs, 2007-2025
-  - momentum_train_2008_2019.csv       13612U momentum, train period
-  - momentum_completo_2008_2025.csv    13612U momentum, full period
+  - etf_adjclose_2008_2025.csv          daily adjusted close, 16 ETFs, 2007-2025
+  - momentum_train_2008_2019.csv        13612U momentum, train period
+  - momentum_completo_2008_2025.csv     13612U momentum, full period
+  - tbill_3m_monthly_refinitiv.csv      monthly 3M T-bill rf/cash return
 
 Outputs saved to ../data/outputs/:
   - s36_equity_curve.csv
@@ -28,9 +29,9 @@ Outputs saved to ../data/outputs/:
   - s36_summary_report.txt
 
 To verify correct replication, expected results:
-  TRAIN CAGR:  10.88%  |  Max DD: -13.87%  |  Crash triggers: 12
-  TEST  CAGR:  12.05%  |  Max DD: -12.52%  |  Crash triggers:  9
-  FULL  CAGR:  11.27%  |  Max DD: -13.87%
+  TRAIN CAGR:  10.94%  |  Max DD: -13.79%  |  Crash triggers: 12
+  TEST  CAGR:  12.54%  |  Max DD: -10.84%  |  Crash triggers:  9
+  FULL  CAGR:  11.47%  |  Max DD: -13.79%
 
 Authors: Garcia Martin I., Mases Campos M., Prior Sanz F.
          IQS School of Engineering — Universitat Ramon Llull, Barcelona
@@ -110,6 +111,25 @@ backtest_months = [m for m in monthly_prices.index
                    if pd.Timestamp(START_DATE) <= m <= pd.Timestamp(TEST_END)]
 
 print(f"  Backtest range: {backtest_months[0].date()} to {backtest_months[-1].date()}  ({len(backtest_months)} months)")
+
+print("\n[1b] Loading 3M T-bill risk-free/cash series...")
+
+rf_file = DATA_DIR / 'tbill_3m_monthly_refinitiv.csv'
+if not rf_file.exists():
+    raise FileNotFoundError(
+        f"\nRisk-free file not found: {rf_file}\n"
+        f"Run: python code/download_refinitiv_tbill.py\n"
+    )
+
+rf_monthly = pd.read_csv(rf_file, index_col='date', parse_dates=True)['rf_monthly']
+rf_monthly.index = pd.to_datetime(rf_monthly.index).to_period('M').to_timestamp('M')
+rf_monthly = rf_monthly.sort_index()
+
+missing_rf = [m for m in backtest_months if m not in rf_monthly.index]
+if missing_rf:
+    raise ValueError(f"Missing T-bill risk-free returns for {len(missing_rf)} backtest months.")
+
+print(f"  3M T-bill rf: {rf_monthly.index[0].date()} to {rf_monthly.index[-1].date()}  ({len(rf_monthly)} months)")
 
 # =============================================================================
 # 2. LOAD MOMENTUM DATA (13612U)
@@ -211,7 +231,7 @@ def get_defensive_weights(mom_row, crash=False):
         mode = 'TLT+IEF_Crash' if crash else 'TLT+IEF_Def'
     else:
         weights['BIL'] = 1.0
-        mode = 'BIL_Crash' if crash else 'BIL_Def'
+        mode = 'Cash_Crash' if crash else 'Cash_Def'
     return weights, mode
 
 # =============================================================================
@@ -290,12 +310,16 @@ for i, t in enumerate(backtest_months):
     # ------------------------------------------------------------------
     # STEP 5: Apply allocation to next month returns
     # ------------------------------------------------------------------
-    port_return = sum(
-        weights.get(a, 0.0) * (
-            next_ret[a] if a in next_ret.index and pd.notna(next_ret[a]) else 0.0
-        )
-        for a in ALL_ASSETS
-    )
+    port_return = 0.0
+    for a in ALL_ASSETS:
+        weight = weights.get(a, 0.0)
+        if weight == 0:
+            continue
+        if a == CASH:
+            asset_return = rf_monthly.loc[t1]
+        else:
+            asset_return = next_ret[a] if a in next_ret.index and pd.notna(next_ret[a]) else 0.0
+        port_return += weight * asset_return
 
     results.append({
         'date'           : t1,
@@ -326,21 +350,26 @@ print(f"  Months processed: {len(results_df)}  |  {results_df.index[0].date()} t
 # =============================================================================
 
 def compute_metrics(ret, initial=INITIAL_CAPITAL):
-    """Compute standard performance metrics. rf=0% for Sharpe and Sortino."""
+    """Compute standard performance metrics using 3M T-bill excess returns."""
     ret   = ret.dropna()
     n     = len(ret)
     if n == 0:
         return {}
+    rf        = rf_monthly.reindex(ret.index)
+    if rf.isna().any():
+        raise ValueError("Missing risk-free observations for metric calculation.")
     years     = n / 12
     cum       = (1 + ret).cumprod()
     final_val = cum.iloc[-1]
     cagr      = final_val ** (1 / years) - 1
     vol       = ret.std() * np.sqrt(12)
-    sharpe    = cagr / vol if vol > 0 else np.nan
+    excess    = ret - rf
+    ex_std    = excess.std()
+    sharpe    = np.sqrt(12) * excess.mean() / ex_std if ex_std > 0 else np.nan
 
-    neg     = ret[ret < 0]
-    dv      = neg.std() * np.sqrt(12) if len(neg) > 1 else np.nan
-    sortino = cagr / dv if (dv and dv > 0) else np.nan
+    downside = np.minimum(excess, 0.0)
+    dv       = np.sqrt((downside ** 2).sum() / (n - 1)) if n > 1 else np.nan
+    sortino  = np.sqrt(12) * excess.mean() / dv if (dv and dv > 0) else np.nan
 
     max_dd  = ((cum - cum.cummax()) / cum.cummax()).min()
     calmar  = cagr / abs(max_dd) if max_dd != 0 else np.nan
@@ -349,7 +378,7 @@ def compute_metrics(ret, initial=INITIAL_CAPITAL):
     return dict(
         n=n, years=round(years, 2),
         CAGR=cagr, Vol=vol,
-        Sharpe_rf0=sharpe, Sortino_rf0=sortino,
+        Sharpe_TBill=sharpe, Sortino_TBill=sortino,
         Max_DD=max_dd, Calmar=calmar,
         Win=win, Total_Ret=final_val - 1,
         Final_Cap=initial * final_val
@@ -391,8 +420,8 @@ for lbl, m in [('TRAIN (2008-2019)', m_train), ('TEST (2020-2025)', m_test), ('F
     print(f"  {'-'*50}")
     print(f"  CAGR:       {m['CAGR']*100:7.2f}%")
     print(f"  Volatility: {m['Vol']*100:7.2f}%")
-    print(f"  Sharpe:     {m['Sharpe_rf0']:7.3f}  (rf=0%)")
-    print(f"  Sortino:    {m['Sortino_rf0']:7.3f}  (rf=0%)")
+    print(f"  Sharpe:     {m['Sharpe_TBill']:7.3f}  (rf=3M T-bill)")
+    print(f"  Sortino:    {m['Sortino_TBill']:7.3f}  (rf=3M T-bill)")
     print(f"  Max DD:     {m['Max_DD']*100:7.2f}%")
     print(f"  Win Rate:   {m['Win']*100:7.2f}%")
     print(f"  Final cap:  ${m['Final_Cap']:>10,.0f}  (from $10,000)")
@@ -405,10 +434,10 @@ print("VERIFICATION CHECK")
 print("=" * 80)
 ok = True
 checks = [
-    ('TRAIN CAGR',  m_train['CAGR']*100, 10.88, 0.05),
-    ('TEST CAGR',   m_test['CAGR']*100,  12.05, 0.05),
-    ('FULL CAGR',   m_full['CAGR']*100,  11.27, 0.05),
-    ('TRAIN MaxDD', m_train['Max_DD']*100, -13.87, 0.05),
+    ('TRAIN CAGR',  m_train['CAGR']*100, 10.94, 0.05),
+    ('TEST CAGR',   m_test['CAGR']*100,  12.54, 0.05),
+    ('FULL CAGR',   m_full['CAGR']*100,  11.47, 0.05),
+    ('TRAIN MaxDD', m_train['Max_DD']*100, -13.79, 0.05),
     ('CRASH TRAIN', crash_train, 12, 0),
     ('CRASH TEST',  crash_test,  9, 0),
 ]
@@ -451,8 +480,8 @@ with open(RESULTS_DIR / 's36_summary_report.txt', 'w', encoding='utf-8') as f:
     for lbl, m in [('TRAIN (2008-2019)', m_train), ('TEST (2020-2025)', m_test), ('FULL (2008-2025)', m_full)]:
         f.write(f"{lbl}\n{'-'*40}\n")
         f.write(f"  CAGR:       {m['CAGR']*100:.2f}%\n")
-        f.write(f"  Sharpe:     {m['Sharpe_rf0']:.3f}\n")
-        f.write(f"  Sortino:    {m['Sortino_rf0']:.3f}\n")
+        f.write(f"  Sharpe:     {m['Sharpe_TBill']:.3f}  (rf=3M T-bill)\n")
+        f.write(f"  Sortino:    {m['Sortino_TBill']:.3f}  (rf=3M T-bill)\n")
         f.write(f"  Max DD:     {m['Max_DD']*100:.2f}%\n")
         f.write(f"  Win Rate:   {m['Win']*100:.2f}%\n")
         f.write(f"  Final Cap:  ${m['Final_Cap']:,.0f}\n\n")

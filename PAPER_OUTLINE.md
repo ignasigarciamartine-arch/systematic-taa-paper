@@ -78,7 +78,7 @@ $$\bar{r}(t) = \frac{1}{15}\sum_{i=1}^{15} r_{i,t}$$
 - Sin costes de transacción en caso base (robustness con costes en Sección 4.8)
 
 **3.7 Benchmarks**
-1. 60/40 portfolio (SPY 60% + AGG 40%), rebalanceado mensualmente
+1. 60/40 portfolio (SPY 60% + IEF 40%), rebalanceado mensualmente
 2. Buy-and-Hold Equal Weight (15 ETFs)
 3. Trend-following baseline: Faber (2007) 10-month SMA
 
@@ -110,12 +110,14 @@ $$\bar{r}(t) = \frac{1}{15}\sum_{i=1}^{15} r_{i,t}$$
 
 **Tabla 4.3 — OOS performance (2020–2025)**
 
-| Metric | Full strategy | 60/40 | B&H EW15 |
-|---|---|---|---|
-| CAGR | 12.05% | 5.89% | TBD |
-| Sharpe (rf=0) | 1.291 | — | — |
-| Max DD | -12.52% | -29.24% | — |
-| Crash triggers | 9 | — | — |
+| Metric | Full strategy |
+|---|---|
+| CAGR | 12.05% |
+| Sharpe (rf=0) | 1.291 |
+| Max DD | -12.52% |
+| Crash triggers | 9 |
+
+Nota: no usar el 5.89% full-period de 60/40 como si fuera OOS. Calcular benchmark OOS antes de incluirlo.
 
 **Tabla 4.4 — Full period (2008–2025)**
 
@@ -161,7 +163,7 @@ $$\bar{r}(t) = \frac{1}{15}\sum_{i=1}^{15} r_{i,t}$$
 - Coste de la protección (underperformance en BULL)
 - Estabilidad OOS: OOS > Train sugiere robustez pero no garantiza persistencia
 - Monte Carlo: limitación principal — path dependency
-- Transaction costs: drag ~0.36pp/año (UCITS análisis Phase 3)
+- Transaction costs: drag ~0.72pp/año en la ventana de 82 transiciones del análisis UCITS Phase 3
 - Implementación práctica: UCITS, mensual, automatizable
 
 ---

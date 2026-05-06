@@ -152,7 +152,7 @@ print(report)
 
 # Save outputs
 out_report = RESULTS_DIR / 's36_regime_report.txt'
-with open(out_report, 'w') as f:
+with open(out_report, 'w', encoding='utf-8') as f:
     f.write(report)
 print(f"\nSaved: {out_report}")
 

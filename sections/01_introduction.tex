@@ -1,26 +1,85 @@
 % ============================================================
-% SECTION 1: Introduction
-% Status: DRAFT — to be written
-% ============================================================
-
 \section{Introduction}
 \label{sec:introduction}
+% ============================================================
 
-% KEY ARGUMENTS TO DEVELOP:
-% 1. Corporate cash management problem: firms hold large cash reserves, typically
-%    invested in money market / short bonds → real return near zero or negative after inflation
-% 2. Equity-like returns incompatible with corporate treasury constraints:
-%    max drawdown must be bounded (< -15%), automation required, no discretion
-% 3. TAA as a middle ground: momentum-based rotation across asset classes
-%    can achieve equity-like CAGR with limited drawdown
-% 4. Gap in the literature: most TAA papers target individual investors,
-%    not corporate treasury with hard drawdown constraints
-% 5. This paper: designs, backtests and validates a systematic TAA strategy
-%    combining multi-period momentum, minimum-correlation portfolio selection,
-%    and a market-breadth crash filter, over 2008–2025 (train + OOS)
-% 6. Main result: CAGR 11.27%, Max DD -13.87%, fully automated, monthly rebalancing
+Corporate treasury departments face an investment problem that differs from
+standard portfolio optimisation.
+Firms hold cash for precautionary motives, transaction needs, and financial
+flexibility \citep{bates2009}, and survey evidence shows that corporate financial
+decisions are shaped by liquidity, risk management, and governance constraints
+\citep{graham2001}.
+For these investors, the relevant benchmark is not simply the highest attainable
+return, but a strategy that can preserve capital through severe market stress
+while earning a return above low-risk cash instruments.
+This creates a narrow design space: money-market instruments and short-duration
+government bonds may offer insufficient real returns, while passive equity
+exposure exposes the treasury portfolio to drawdowns that are difficult to
+reconcile with corporate liquidity mandates.
 
-% TODO: write 4-5 paragraphs following the arguments above.
-% Style: JEF standard — concise, no motivational language, state contribution early.
+Tactical asset allocation (TAA) offers a potential middle ground.
+By rotating systematically across asset classes, TAA strategies seek to
+participate in persistent return trends while reducing exposure during adverse
+market regimes.
+The empirical literature documents momentum effects across equities and across
+asset classes \citep{jegadeesh1993, moskowitz2012, asness2013}, and trend-based
+allocation rules have been shown to improve drawdown profiles in diversified
+portfolios \citep{faber2007, antonacci2014}.
+However, much of this literature is framed around individual investors, hedge
+funds, or institutional portfolio management.
+Less attention has been paid to the specific treasury problem: a rule-based,
+fully automated strategy with monthly liquidity, no leverage or derivatives, and
+a hard maximum drawdown constraint.
 
-\end{document}
+This paper develops and tests such a strategy.
+The proposed allocation rule combines three components.
+First, a multi-period momentum score averages 1-, 3-, 6-, and 12-month signals
+to reduce dependence on any single lookback horizon.
+Second, a minimum-correlation triplet selection rule implements the central
+diversification insight of modern portfolio theory \citep{markowitz1952} by
+holding three low-correlation assets among the eligible momentum candidates.
+Third, a market-breadth crash filter, inspired by breadth-based defensive
+allocation frameworks \citep{keller2017}, overrides the momentum allocation when
+the equal-weighted risky universe experiences a broad monthly decline.
+In that state, the portfolio reallocates to long-duration treasuries and
+intermediate-duration treasuries or, if necessary, to cash.
+
+We evaluate the strategy on a universe of 15 diversified ETFs covering global
+equities, real estate, commodities, and fixed income from January 2008 to
+December 2025.
+The empirical design uses a strict temporal split: 2008--2019 for parameter
+selection and 2020--2025 for out-of-sample evaluation.
+This period includes the Global Financial Crisis, the COVID-19 crash, the 2022
+inflation and rate shock, and the April 2025 tariff shock, providing several
+distinct stress regimes in which to test the drawdown-control mechanism.
+We also construct a UCITS-compliant European implementation to assess whether the
+strategy can be translated into instruments available to European entities.
+
+The main result is that the strategy satisfies the corporate drawdown constraint
+while delivering equity-like returns.
+Over 2008--2025 it achieves a CAGR of 11.47\%, a Sharpe ratio of 0.974, and a
+maximum drawdown of $-13.79\%$.
+Out-of-sample performance over 2020--2025 remains comparable, with a CAGR of
+12.54\% and a maximum drawdown of $-10.84\%$.
+The crash filter is economically important: during the Global Financial Crisis
+the strategy gains $+17.64\%$ while the S\&P 500 loses $-33.05\%$.
+The UCITS implementation achieves a gross CAGR of 12.71\% over March 2019--March
+2026, with an estimated net CAGR of 12.35\% in the transaction-cost window.
+
+The paper contributes to the literature in two ways.
+First, it reframes TAA as a corporate cash-management problem rather than a
+generic return-enhancement exercise.
+Second, it shows that a simple breadth-based crash filter can materially improve
+drawdown control when combined with momentum and correlation-based selection.
+The resulting strategy remains transparent, reproducible, and implementable with
+monthly ETF trades, making it compatible with the operational constraints of
+corporate treasury.
+
+The remainder of the paper is structured as follows.
+Section~\ref{sec:literature} reviews the relevant literature.
+Section~\ref{sec:methodology} describes the strategy design and data.
+Section~\ref{sec:results} reports in-sample, out-of-sample, crisis-period, and
+robustness results.
+Section~\ref{sec:discussion} discusses the economic mechanism and practical
+implications.
+Section~\ref{sec:conclusion} concludes.

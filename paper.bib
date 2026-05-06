@@ -1,9 +1,51 @@
 % ============================================================
-% BIBLIOGRAPHY — paper.bib
+% BIBLIOGRAPHY -- paper.bib
 % Strategy: anchor in primary academic sources only
-% DO NOT add Keller & Butler (Optimum3) — practitioner white paper
-% Keller & Keuning (2017) HAA — OK, SSRN working paper cited in academic literature
+% DO NOT add Keller & Butler (Optimum3) -- practitioner white paper
+% Keller & Keuning (2017) HAA -- OK, SSRN working paper cited in academic literature
+
+@article{ledoitwolf2008,
+  author  = {Ledoit, Olivier and Wolf, Michael},
+  title   = {Robust Performance Hypothesis Testing with the {Sharpe} Ratio},
+  journal = {Journal of Empirical Finance},
+  year    = {2008},
+  volume  = {15},
+  number  = {5},
+  pages   = {850--859},
+  doi     = {10.1016/j.jempfin.2008.03.002},
+}
 % ============================================================
+
+% ---- Bootstrap methodology ----
+@article{politis1992,
+  author  = {Politis, Dimitris N. and Romano, Joseph P.},
+  title   = {A Circular Block-Resampling Procedure for Stationary Data},
+  journal = {Exploring the Limits of Bootstrap},
+  editor  = {LePage, R. and Billard, L.},
+  publisher = {Wiley},
+  year    = {1992},
+  pages   = {263--270}
+}
+
+@article{politisromano1994,
+  author  = {Politis, Dimitris N. and Romano, Joseph P.},
+  title   = {The Stationary Bootstrap},
+  journal = {Journal of the American Statistical Association},
+  year    = {1994},
+  volume  = {89},
+  number  = {428},
+  pages   = {1303--1313}
+}
+
+@article{politiswhite2004,
+  author  = {Politis, Dimitris N. and White, Halbert},
+  title   = {Automatic Block-Length Selection for the Dependent Bootstrap},
+  journal = {Econometric Reviews},
+  year    = {2004},
+  volume  = {23},
+  number  = {1},
+  pages   = {53--70}
+}
 
 % ---- Foundations: Portfolio Theory ----
 @article{markowitz1952,
@@ -37,6 +79,16 @@
   pages   = {65--91}
 }
 
+@article{jegadeesh2023,
+  author  = {Jegadeesh, Narasimhan and Titman, Sheridan},
+  title   = {Momentum: Evidence and Insights 30 Years Later},
+  journal = {Pacific-Basin Finance Journal},
+  year    = {2023},
+  volume  = {82},
+  pages   = {102202},
+  doi     = {10.1016/j.pacfin.2023.102202}
+}
+
 @article{moskowitz2012,
   author  = {Moskowitz, Tobias J. and Ooi, Yao Hua and Pedersen, Lasse Heje},
   title   = {Time Series Momentum},
@@ -55,6 +107,27 @@
   volume  = {68},
   number  = {3},
   pages   = {929--985}
+}
+
+@article{barroso2015,
+  author  = {Barroso, Pedro and Santa-Clara, Pedro},
+  title   = {Momentum Has Its Moments},
+  journal = {Journal of Financial Economics},
+  year    = {2015},
+  volume  = {116},
+  number  = {1},
+  pages   = {111--120},
+  doi     = {10.1016/j.jfineco.2014.11.010}
+}
+
+@article{blanco2023,
+  author  = {Blanco, Ivan and De Jesus, Miguel and Remesal, Alvaro},
+  title   = {Overlapping Momentum Portfolios},
+  journal = {Journal of Empirical Finance},
+  year    = {2023},
+  volume  = {72},
+  pages   = {1--22},
+  doi     = {10.1016/j.jempfin.2023.02.002}
 }
 
 % ---- Tactical Asset Allocation ----
@@ -78,9 +151,20 @@
 @article{antonacci2012,
   author  = {Antonacci, Gary},
   title   = {Risk Premia Harvesting Through Dual Momentum},
-  journal = {Portfolio Management Consultants},
-  year    = {2012},
+  journal = {Journal of Management and Entrepreneurship},
+  year    = {2017},
+  volume  = {2},
+  number  = {1},
+  pages   = {27--55},
   note    = {Available at SSRN: https://ssrn.com/abstract=2042750}
+}
+
+@article{antonacci2015,
+  author  = {Antonacci, Gary},
+  title   = {Absolute Momentum: A Simple Rule-Based Strategy and Universal Trend-Following Overlay},
+  journal = {SSRN Working Paper},
+  year    = {2015},
+  note    = {Available at SSRN: https://ssrn.com/abstract=2244633}
 }
 
 % ---- Crash Detection / Market Breadth ----
@@ -114,13 +198,44 @@
 }
 
 @article{bates2009,
-  author  = {Bates, Thomas W. and Kahle, Kathleen M. and Stulz, René M.},
+  author  = {Bates, Thomas W. and Kahle, Kathleen M. and Stulz, Rene M.},
   title   = {Why Do {U.S.} Firms Hold So Much More Cash than They Used To?},
   journal = {The Journal of Finance},
   year    = {2009},
   volume  = {64},
   number  = {5},
   pages   = {1985--2021}
+}
+
+@article{opler1999,
+  author  = {Opler, Tim and Pinkowitz, Lee and Stulz, Rene and Williamson, Rohan},
+  title   = {The Determinants and Implications of Corporate Cash Holdings},
+  journal = {Journal of Financial Economics},
+  year    = {1999},
+  volume  = {52},
+  number  = {1},
+  pages   = {3--46},
+  doi     = {10.1016/S0304-405X(99)00003-3}
+}
+
+@article{cardella2021,
+  author  = {Cardella, Laura and Fairhurst, Douglas and Klasa, Sandy},
+  title   = {What Determines the Composition of a Firm's Cash Reserves?},
+  journal = {Journal of Corporate Finance},
+  year    = {2021},
+  volume  = {68},
+  pages   = {101924},
+  doi     = {10.1016/j.jcorpfin.2021.101924}
+}
+
+@article{ysmailov2025,
+  author  = {Ysmailov, Bektemir},
+  title   = {Costly External Finance and Corporate Investment: The Role of Marketable Securities},
+  journal = {Finance Research Letters},
+  year    = {2025},
+  volume  = {83},
+  pages   = {107751},
+  doi     = {10.1016/j.frl.2025.107751}
 }
 
 % ---- Risk metrics ----
@@ -152,7 +267,7 @@
   note   = {FRED Economic Data. Retrieved from https://fred.stlouisfed.org/series/DGS3MO}
 }
 
-% ---- TAA strategies — Elsevier papers (similar to ours) ----
+% ---- TAA strategies -- Elsevier papers (similar to ours) ----
 
 @article{bellu2020,
   author  = {Bellu, Mirko and Conversano, Claudio},
@@ -206,6 +321,69 @@
   doi     = {10.1016/j.pacfin.2018.08.003}
 }
 
+@article{guilleminot2014,
+  author  = {Guilleminot, Benoit and Ohana, Jean-Jacques and Ohana, Steve},
+  title   = {Risk- versus Trend-Driven Global Tactical Asset Allocation},
+  journal = {The Journal of Portfolio Management},
+  year    = {2014},
+  volume  = {40},
+  number  = {3},
+  pages   = {21--33},
+  doi     = {10.3905/jpm.2014.40.3.021}
+}
+
+@article{blitz2008,
+  author  = {Blitz, David and van Vliet, Pim},
+  title   = {Global Tactical Cross-Asset Allocation: Applying Value and Momentum Across Asset Classes},
+  journal = {The Journal of Portfolio Management},
+  year    = {2008},
+  volume  = {35},
+  number  = {1},
+  pages   = {23--38},
+  doi     = {10.3905/JPM.2008.35.1.23}
+}
+
+@article{moreira2017,
+  author  = {Moreira, Alan and Muir, Tyler},
+  title   = {Volatility-Managed Portfolios},
+  journal = {The Journal of Finance},
+  year    = {2017},
+  volume  = {72},
+  number  = {4},
+  pages   = {1611--1644},
+  doi     = {10.1111/jofi.12513}
+}
+
+@article{bozovic2024,
+  author  = {Bozovic, Milos},
+  title   = {{VIX}-Managed Portfolios},
+  journal = {International Review of Financial Analysis},
+  year    = {2024},
+  volume  = {95},
+  pages   = {103353},
+  doi     = {10.1016/j.irfa.2024.103353}
+}
+
+@article{wang2024vmp,
+  author  = {Wang, Chuyu and Li, Junye},
+  title   = {Volatility-Managed Portfolios in the Chinese Equity Market},
+  journal = {Pacific-Basin Finance Journal},
+  year    = {2024},
+  volume  = {88},
+  pages   = {102574},
+  doi     = {10.1016/j.pacfin.2024.102574}
+}
+
+@article{ergun2023,
+  author  = {Ergun, Lerby M.},
+  title   = {Extreme Downside Risk in the Cross-Section of Asset Returns},
+  journal = {International Review of Financial Analysis},
+  year    = {2023},
+  volume  = {90},
+  pages   = {102840},
+  doi     = {10.1016/j.irfa.2023.102840}
+}
+
 % ---- Momentum crashes ----
 @article{daniel2016,
   author  = {Daniel, Kent and Moskowitz, Tobias J.},
@@ -217,6 +395,40 @@
   pages   = {221--247},
   doi     = {10.1016/j.jfineco.2015.12.002},
   note    = {Justifies the need for a crash filter in momentum strategies}
+}
+
+% ---- Backtest overfitting / data snooping ----
+
+@article{sullivan1999,
+  author  = {Sullivan, Ryan and Timmermann, Allan and White, Halbert},
+  title   = {Data-Snooping, Technical Trading Rule Performance, and the Bootstrap},
+  journal = {The Journal of Finance},
+  year    = {1999},
+  volume  = {54},
+  number  = {5},
+  pages   = {1647--1691}
+}
+
+@article{harvey2016,
+  author  = {Harvey, Campbell R. and Liu, Yan and Zhu, Heqing},
+  title   = {... and the Cross-Section of Expected Returns},
+  journal = {The Review of Financial Studies},
+  year    = {2016},
+  volume  = {29},
+  number  = {1},
+  pages   = {5--68},
+  doi     = {10.1093/rfs/hhv059}
+}
+
+@article{bailey2017,
+  author  = {Bailey, David H. and Borwein, Jonathan M. and Lopez de Prado, Marcos and Zhu, Qiji Jim},
+  title   = {The Probability of Backtest Overfitting},
+  journal = {Journal of Computational Finance},
+  year    = {2017},
+  volume  = {20},
+  number  = {4},
+  pages   = {39--69},
+  doi     = {10.21314/JCF.2016.322}
 }
 
 % ---- Recent papers 2022-2025 ----
@@ -253,5 +465,5 @@
 }
 
 % ---- TODO: verify and add if cited in text ----
-% Merton (1973) — intertemporal CAPM
-% Baele et al. (2010) — flight to quality (defensive bonds)
+% Merton (1973) -- intertemporal CAPM
+% Baele et al. (2010) -- flight to quality (defensive bonds)

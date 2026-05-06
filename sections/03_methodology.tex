@@ -1,69 +1,206 @@
 % ============================================================
-% SECTION 3: Methodology
-% Status: DRAFT — to be written
-% ============================================================
-
 \section{Methodology}
 \label{sec:methodology}
+% ============================================================
 
-% ---- 3.1 Asset Universe ----
-% 15 risk ETFs + BIL (cash proxy)
-% SPY, QQQ, VGK, EWJ, SCZ, EEM, VNQ, REM, GLD, IEF, TLT, TIP, DBC, BWX, RWX
-% Justify breadth: 6 equity regions + real estate + commodities + bonds
-% Source: Refinitiv Eikon, adjusted close prices
-% Period: Jan 2008 – Dec 2025 | Train: 2008–2019 | OOS: 2020–2025
+\subsection{Asset Universe and Data}
 
-% ---- 3.2 Momentum Signal: 13612U ----
-% M_i(t) = (1/4)(R_{1m} + R_{3m} + R_{6m} + R_{12m})
-% Equal-weight average of 4 lookback windows
-% Justification: reduces look-back sensitivity (Moskowitz et al., 2012)
-% Absolute threshold θ = 2%: only eligible if M_i(t) ≥ 2%
-% (Antonacci absolute momentum filter)
+The investment universe consists of 15 risky ETFs covering six geographic
+equity regions, real estate, commodities, and fixed income, plus one cash
+proxy (Table~\ref{tab:universe}).
+All prices are adjusted daily closing prices sourced from Refinitiv Eikon.
+Cash returns and the risk-free rate used in performance ratios are computed from
+the monthly 3-month U.S. Treasury Bill rate sourced from Refinitiv/Federal
+Reserve data \citep{fred_dgs3mo}; the annual yield is converted to a monthly
+return as $(1+y_t/100)^{1/12}-1$.
+The sample spans January 2007 to December 2025; the year 2007 serves as
+a warm-up period for the 12-month momentum lookback, so the effective
+backtest starts in January 2008.
 
-% ---- 3.3 Portfolio Selection: Minimum-Correlation Triplet ----
-% Top-7 by momentum score → eligible set A_t+
-% If |A_t+| ≥ 3: select triplet minimising avg pairwise correlation
-%   Correlation computed on daily returns of previous calendar month
-%   Equal-weight 1/3 allocation
-% Motivation: Markowitz (1952) — diversification via low-correlation assets
+\begin{table}[H]
+\centering
+\caption{Investment universe}
+\label{tab:universe}
+\small
+\begin{tabular}{llll}
+\toprule
+ETF & Name & Asset Class & Region \\
+\midrule
+SPY & SPDR S\&P 500 & Equity & US Large Cap \\
+QQQ & Invesco QQQ & Equity & US Technology \\
+VGK & Vanguard FTSE Europe & Equity & Europe \\
+EWJ & iShares MSCI Japan & Equity & Japan \\
+SCZ & iShares MSCI EAFE Small Cap & Equity & Intl Small Cap \\
+EEM & iShares MSCI Emerging Markets & Equity & Emerging Markets \\
+VNQ & Vanguard Real Estate & Real Estate & US REITs \\
+REM & iShares Mortgage Real Estate & Real Estate & US Mortgage REITs \\
+GLD & SPDR Gold Shares & Commodity & Gold \\
+IEF & iShares 7--10 Year Treasury & Fixed Income & US Intermediate \\
+TLT & iShares 20+ Year Treasury & Fixed Income & US Long Duration \\
+TIP & iShares TIPS Bond & Fixed Income & US Inflation-Linked \\
+DBC & Invesco DB Commodity Index & Commodity & Broad Commodities \\
+BWX & SPDR Bloomberg Intl Treasury & Fixed Income & International \\
+RWX & SPDR Dow Jones Intl Real Estate & Real Estate & Intl REITs \\
+\midrule
+BIL & SPDR Bloomberg 1--3 Month T-Bill & Cash Proxy & US Cash \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-% ---- 3.4 Defensive Mode ----
-% Triggered when |A_t+| < 3 (not enough eligible assets)
-% Enhanced defensive: TLT (50%) + IEF (50%) if avg momentum of TLT+IEF > 0
-% Pure cash: BIL (100%) if momentum of defensive assets ≤ 0
-% Rationale: flight-to-quality (long-duration treasuries outperform in risk-off)
+The backtest uses monthly rebalancing with a strict train/out-of-sample split:
+\begin{itemize}
+    \item \textbf{Training period}: January 2008 -- December 2019 (142 months).
+          All parameters are selected exclusively within this window.
+    \item \textbf{Out-of-sample period}: January 2020 -- December 2025 (72 months).
+          No parameter is adjusted after this split.
+\end{itemize}
 
-% ---- 3.5 Market-Breadth Crash Filter ----
-% Each month: compute r̄(t) = equal-weight avg return of all 15 risky ETFs
-% If r̄(t) < τ = -4%: market crash signal → override to defensive mode
-%   TLT+IEF if their momentum > 0, else BIL
-% Threshold τ = -4% selected by in-sample optimisation (see Table X)
-% Inspired by market breadth concept in Keller & Keuning (2017)
+\subsection{Multi-Period Momentum Score}
 
-% ---- 3.6 Rebalancing and Execution ----
-% Monthly frequency, end-of-month signal, executed first business day of next month
-% No transaction costs modelled in base case (sensitivity analysis in Section 5)
-% [TODO: add transaction cost model — IBKR ~0.35-0.50 bp per trade, see Phase 3 data]
+For each risky asset $i$ at month-end $t$, we compute the
+13612U momentum score as the equal-weight average of four lookback returns:
 
-% ---- 3.7 Performance Metrics ----
-% CAGR, Sharpe (rf=0%), Sortino (rf=0%), Max Drawdown, Calmar, Win Rate
-% Note on risk-free rate: rf=0% used throughout for consistency and reproducibility
-% OOS split: strict temporal — no data from 2020–2025 used in any parameter choice
+\begin{equation}
+M_{i,t} = \frac{1}{4}\left(R_{i,t}^{1} + R_{i,t}^{3} + R_{i,t}^{6} + R_{i,t}^{12}\right)
+\label{eq:momentum}
+\end{equation}
 
-% ---- 3.8 Benchmarks ----
-% (1) 60/40 Portfolio (SPY 60% + AGG 40%), monthly rebalanced
-% (2) Buy-and-Hold Equal Weight (15 ETFs)
-% (3) Trend-following baseline (Faber 2007: 10-month SMA)
-% NOTE: no mention of Optimum3 — benchmarks are all independently motivated
+where $R_{i,t}^{k}$ is the $k$-month total return of asset $i$ ending at month $t$.
+Equal weighting across four horizons reduces sensitivity to any single lookback
+window, an approach motivated by the robustness evidence in \citet{moskowitz2012}.
 
-% ---- 3.9 Robustness Checks (outline — results in Section 4) ----
-% (a) Threshold sensitivity: τ ∈ {-2%, -2.5%, -3%, -3.5%, -4%, -4.5%, -5%}
-% (b) Momentum window sensitivity: M6, M12, 13612U, 13612W
-% (c) Bootstrap: circular block bootstrap (block=6m, N=10,000)
-% (d) Transaction cost scenarios: 0 bp, 25 bp, 50 bp per trade
-% (e) UCITS implementation: equivalent European ETFs (Phase 3 results)
+Assets are ranked in descending order of $M_{i,t}$; the top $N = 7$ form the
+candidate set. An absolute momentum threshold $\theta = 2\%$ is then applied:
+only assets with $M_{i,t} \geq \theta$ pass into the eligible set $\mathcal{A}_t^+$.
+The threshold implements the absolute momentum filter of \citet{antonacci2012},
+ensuring the strategy does not hold assets in a negative trend.
 
-% TODO: write full methodology section ~2,000 words with equations in LaTeX.
-% Use \begin{equation} for all formulas.
+\subsection{Minimum-Correlation Triplet Selection}
 
-\end{document}
+Portfolio construction depends on the size of $\mathcal{A}_t^+$:
+
+\begin{equation}
+\text{Portfolio}_t =
+\begin{cases}
+\text{Triplet}(\mathcal{A}_t^+) & \text{if } |\mathcal{A}_t^+| \geq 3 \\
+\text{Defensive}_t              & \text{if } |\mathcal{A}_t^+| < 3
+\end{cases}
+\label{eq:selection}
+\end{equation}
+
+When $|\mathcal{A}_t^+| \geq 4$, the triplet is selected to minimise average
+pairwise correlation across all $\binom{|\mathcal{A}_t^+|}{3}$ combinations:
+
+\begin{equation}
+\{a^*, b^*, c^*\} = \underset{\{a,b,c\} \subseteq \mathcal{A}_t^+}{\arg\min}
+\;\frac{\rho_{ab} + \rho_{ac} + \rho_{bc}}{3}
+\label{eq:triplet}
+\end{equation}
+
+where $\rho_{ij}$ is the Pearson correlation of daily returns of assets $i$ and $j$
+computed over the calendar month $t$.
+When $|\mathcal{A}_t^+| = 3$, all three eligible assets are held equally.
+Each selected asset receives equal weight $w = 1/3$.
+This selection rule operationalises the mean-variance insight of \citet{markowitz1952}
+through a transparent, parameter-free criterion.
+
+\subsection{Enhanced Defensive Allocation}
+
+The defensive mode allocates to long-duration US Treasuries rather than
+pure cash, exploiting the flight-to-quality phenomenon observed during
+equity market stress:
+
+\begin{equation}
+\text{Defensive}_t =
+\begin{cases}
+\frac{1}{2}\,\text{TLT} + \frac{1}{2}\,\text{IEF} & \text{if } \max(M_{\text{TLT},t},\, M_{\text{IEF},t}) \geq 0 \\
+\text{Cash} & \text{otherwise}
+\end{cases}
+\label{eq:defensive}
+\end{equation}
+
+This ensures that even in defensive mode the strategy captures treasury rallies
+that typically accompany equity sell-offs, rather than remaining idle in cash.
+In implementation, the cash sleeve can be represented by short-duration Treasury
+vehicles such as BIL; in the backtest it is credited with the 3-month T-bill
+return to avoid cash-ETF distribution-adjustment artefacts.
+
+\subsection{Market-Breadth Crash Filter}
+
+Before executing the momentum signal, a crash filter is applied each month.
+Let $\bar{r}_t$ denote the equal-weight average of the monthly returns of all
+15 risky assets:
+
+\begin{equation}
+\bar{r}_t = \frac{1}{15} \sum_{i=1}^{15} r_{i,t}
+\label{eq:breadth}
+\end{equation}
+
+If $\bar{r}_t < \tau$ where $\tau = -4\%$, a market crash is signalled and
+the portfolio is immediately directed to the defensive allocation
+(Equation~\ref{eq:defensive}), overriding the momentum signal.
+This pre-empts momentum continuation under conditions of broad market stress,
+addressing the momentum crash vulnerability documented by \citet{daniel2016}.
+The threshold $\tau = -4\%$ was selected by in-sample optimisation
+(Table~\ref{tab:threshold_sensitivity}).
+
+\subsection{Complete Algorithm}
+
+The full decision rule, applied at each month-end $t$ for execution on the
+first business day of month $t+1$, is summarised in Figure~\ref{fig:flowchart}.
+
+\begin{figure}[H]
+\centering
+% \includegraphics[width=0.75\textwidth]{figures/s36_decision_tree.png}
+\fbox{\parbox{0.75\textwidth}{\centering\vspace{1cm}
+[Figure: Strategy decision flowchart]\vspace{1cm}}}
+\caption{Decision flowchart of the S3.6 strategy. At each month-end,
+the crash filter (Step~1) takes precedence; if not triggered,
+momentum scoring and triplet selection proceed (Steps~2--4).}
+\label{fig:flowchart}
+\end{figure}
+
+\subsection{Performance Metrics}
+
+Let $r_t$ denote the monthly portfolio return and $r_{f,t}$ the monthly
+3-month U.S. Treasury Bill return. Risk-adjusted metrics are computed from
+monthly excess returns $x_t = r_t-r_{f,t}$, not from a zero-rate convention.
+
+\begin{align}
+\text{CAGR} &= \left(\prod_{t=1}^{T}(1 + r_t)\right)^{12/T} - 1
+\label{eq:cagr} \\[6pt]
+\text{Sharpe} &= \frac{\sqrt{12}\,\bar{x}}{\sigma_x}
+\label{eq:sharpe} \\[6pt]
+\text{Sortino} &= \frac{\sqrt{12}\,\bar{x}}
+{\sqrt{\frac{1}{T-1}\sum_{t=1}^{T}\min(x_t,0)^2}}
+\label{eq:sortino} \\[6pt]
+\text{Max DD} &= \min_{t} \frac{V_t - \max_{s \leq t} V_s}{\max_{s \leq t} V_s}
+\label{eq:maxdd}
+\end{align}
+
+where $\bar{x}$ and $\sigma_x$ are the sample mean and standard deviation of
+monthly excess returns, and $V_t$ is the portfolio value at month $t$.
+Drawdowns are measured on end-of-month portfolio values.
+
+\subsection{Benchmarks}
+
+We compare the strategy against two passive benchmarks:
+\begin{enumerate}
+    \item \textbf{60/40 portfolio}: 60\% SPY + 40\% IEF, rebalanced monthly.
+    \item \textbf{Buy-and-hold equal weight (B\&H EW)}: equal allocation
+          across all 15 risky ETFs, rebalanced monthly.
+\end{enumerate}
+
+\subsection{Robustness Checks}
+
+We assess robustness through: (i) sensitivity of results to the crash threshold
+$\tau \in \{-2.0\%, -2.5\%, -3.0\%, -3.5\%, -4.0\%, -4.5\%, -5.0\%\}$;
+(ii) sensitivity to momentum specification (M6, M12, 13612U, 13612W);
+(iii) a return-level circular block bootstrap with block length 6 months and
+$N = 10{,}000$ simulations to assess sequencing risk in the realised strategy
+return stream;
+(iv) a strategy-level paired daily block bootstrap with block length 63 trading
+days and $N = 10{,}000$ simulations, in which the asset return matrix is
+resampled jointly and the momentum, crash filter, defensive switch, and triplet
+selection are recomputed on each synthetic history; and
+(v) a UCITS implementation using European-domiciled equivalent ETFs.

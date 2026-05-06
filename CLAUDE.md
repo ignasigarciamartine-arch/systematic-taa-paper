@@ -95,21 +95,21 @@ REBALANCEO: ejecutar el primer día hábil del mes siguiente.
 
 ## Resultados verificados (fuente de verdad)
 
-Fuente: `code/s36_backtest.py` ejecutado con datos Refinitiv Eikon.
-Verificado: 10 Mar 2026. Reconfirmado: 14 Apr 2026.
+Fuente: `code/s36_backtest.py` ejecutado con datos Refinitiv Eikon y
+`data/prices/tbill_3m_monthly_refinitiv.csv` (`aUSTRB3AV`) para cash/risk-free.
+Verificado: 28 Apr 2026.
 
 ### In-sample (Train 2008–2019, 142 meses)
 
 | Métrica | S3.6 |
 |---|---|
-| CAGR | **10.88%** |
+| CAGR | **10.94%** |
 | Volatilidad | 10.97% |
-| Sharpe (rf=0%) | 0.991 |
-| Sortino (rf=0%) | 1.633 |
-| Max Drawdown | **-13.87%** |
-| Calmar | 0.784 |
-| Win Rate | 61.97% |
-| Capital final ($10k) | $33,930 |
+| Sharpe (rf=3M T-bill) | 0.951 |
+| Sortino (rf=3M T-bill) | 1.776 |
+| Max Drawdown | **-13.79%** |
+| Win Rate | 65.49% |
+| Capital final ($10k) | $34,149 |
 | Crash triggers | 12 |
 
 Distribución de modos (train):
@@ -117,60 +117,83 @@ Distribución de modos (train):
 - Crash TLT+IEF: 10 meses (7.0%)
 - Defensive TLT+IEF: 6 meses (4.2%)
 - Offensive EW3: 6 meses (4.2%)
-- BIL Defensive: 4 meses (2.8%)
-- BIL Crash: 2 meses (1.4%)
+- Cash Defensive: 4 meses (2.8%)
+- Cash Crash: 2 meses (1.4%)
 
 ### Out-of-sample (Test 2020–2025, 72 meses)
 
 | Métrica | S3.6 |
 |---|---|
-| CAGR | **12.05%** |
-| Volatilidad | 9.34% |
-| Sharpe (rf=0%) | 1.291 |
-| Sortino (rf=0%) | 2.013 |
-| Max Drawdown | **-12.52%** |
-| Capital final ($10k) | $19,793 |
+| CAGR | **12.54%** |
+| Volatilidad | 9.30% |
+| Sharpe (rf=3M T-bill) | 1.029 |
+| Sortino (rf=3M T-bill) | 1.808 |
+| Max Drawdown | **-10.84%** |
+| Capital final ($10k) | $20,312 |
 | Crash triggers | 9 |
 
 ### Período completo (2008–2025, 214 meses)
 
 | Métrica | S3.6 |
 |---|---|
-| CAGR | **11.27%** |
-| Volatilidad | 10.43% |
-| Sharpe (rf=0%) | 1.081 |
-| Sortino (rf=0%) | 1.745 |
-| Max Drawdown | **-13.87%** |
-| Total Return | +571.59% |
-| Capital final ($10k) | $67,159 |
+| CAGR | **11.47%** |
+| Volatilidad | 10.41% |
+| Sharpe (rf=3M T-bill) | 0.974 |
+| Sortino (rf=3M T-bill) | 1.788 |
+| Max Drawdown | **-13.79%** |
+| Total Return | +593.65% |
+| Capital final ($10k) | $69,365 |
 
 ### Benchmarks (mismo período completo)
 
 | Benchmark | CAGR | Max DD |
 |---|---|---|
-| 60/40 (SPY+AGG) | 5.89% | -29.24% |
-| B&H Equal Weight (15 ETFs) | TBD | TBD |
+| 60/40 (SPY+IEF) | 6.16% | -29.24% |
+| B&H Equal Weight (15 ETFs) | 2.54% | -39.71% |
 
 ### Crisis periods
 
 | Crisis | Período | S3.6 return | S&P 500 | Triggers |
 |---|---|---|---|---|
 | GFC | Jan 2008 – Jun 2009 | **+17.64%** | -33.05% | 6 |
-| COVID | Mar 2020 – May 2023 | +27.43% | +41.04% | 7 |
+| COVID | Mar 2020 – May 2023 | +30.21% | +41.04% | 7 |
 | Tariff Shock | Mar–Apr 2025 | **+6.78%** | -6.67% | 0 |
 
-### Monte Carlo (10,000 simulaciones, circular block bootstrap)
+### Monte Carlo 1 — return-level (10,000 simulaciones, circular block bootstrap)
 
 | Percentil | CAGR |
 |---|---|
-| P10 | 2.59% |
-| P50 (mediana) | 7.09% |
-| P75 | 9.13% |
-| P90 | 12.18% |
+| P10 | 8.34% |
+| P50 (mediana) | 11.51% |
+| P75 | 13.23% |
+| P90 | 14.75% |
 
-**Limitación importante**: la mediana bootstrap (7.09%) es significativamente inferior
-al histórico (11.27%). El outperformance histórico depende de la secuencia específica
-del crash de 2008 + el bull de bonos. Esto hay que declararlo en el paper.
+**Limitación importante**: el bootstrap de retornos muestra CAGR robusto, pero
+el P10 de MaxDD es -18.61%. El control de drawdown observado no debe venderse
+como garantía estadística.
+
+### Monte Carlo 2 — strategy-level (10,000 simulaciones, daily paired block bootstrap)
+
+Fuente: `code/s36_montecarlo_strategy.py`, verificado 05 May 2026.
+Periodo efectivo completo: 214 meses (Mar 2008--Dic 2025).
+Método: resampleo circular de retornos diarios multi-activo, block=63 trading days;
+re-ejecuta momentum, crash filter, defensive switch y triplet selection en cada path.
+Incluye 60/40 y SPY sobre los mismos paths.
+
+| Estrategia | CAGR P10 | CAGR P50 | CAGR P90 | Sharpe P50 | MaxDD P10 | MaxDD P50 |
+|---|---:|---:|---:|---:|---:|---:|
+| S3.6 | 0.59% | 4.45% | 8.56% | 0.311 | -44.34% | -29.24% |
+| 60/40 | 3.11% | 6.14% | 9.05% | 0.522 | -33.10% | -21.90% |
+| SPY | 3.89% | 9.24% | 14.57% | 0.543 | -53.37% | -36.69% |
+
+Probabilidades clave:
+- P(CAGR > 60/40) = 25.6%
+- P(CAGR > SPY) = 8.7%
+- P(CAGR >= 7% and MaxDD > -15%) = 1.6%
+
+**Lectura crítica**: el strategy-level MC no sostiene superioridad general.
+El claim defendible debe limitarse a performance histórica/OOS y crisis observadas,
+no robustez estadística fuerte frente a historias sintéticas.
 
 ---
 
@@ -208,7 +231,8 @@ paper/
     ├── s36_backtest.py         ← backtest principal (autosuficiente con data/ local)
     ├── s36_crisis_analysis.py  ← análisis por periodos de crisis
     ├── s36_regime_analysis.py  ← análisis por régimen de mercado
-    └── s36_montecarlo.py       ← simulación Monte Carlo
+    ├── s36_montecarlo.py       ← Monte Carlo return-level
+    └── s36_montecarlo_strategy.py ← Monte Carlo strategy-level con 60/40 y SPY
 ```
 
 ---
@@ -249,10 +273,10 @@ Outputs en `data/outputs/`:
 
 Si el backtest reproduce correctamente:
 ```
-TRAIN CAGR:  10.88%
-TEST  CAGR:  12.05%
-FULL  CAGR:  11.27%
-Max DD:     -13.87%
+TRAIN CAGR:  10.94%
+TEST  CAGR:  12.54%
+FULL  CAGR:  11.47%
+Max DD:     -13.79%
 Crash triggers (train): 12
 Crash triggers (test):   9
 ```
@@ -281,10 +305,10 @@ Date,SPY,QQQ,VGK,EWJ,SCZ,EEM,VNQ,REM,GLD,IEF,TLT,TIP,DBC,BWX,RWX,BIL
 ## Reglas del paper (importante)
 
 1. **No mencionar Optimum3** en ninguna sección, tabla, figura o referencia.
-2. Los benchmarks del paper son: 60/40, B&H EW15, y Faber (2007) trend-following.
+2. Los benchmarks del paper son: 60/40 (SPY+IEF), B&H EW15, y Faber (2007) trend-following.
 3. El crash filter se ancla en Keller & Keuning (2017) HAA — no en ningún otro trabajo.
 4. Todos los números deben coincidir exactamente con los de este CLAUDE.md.
-5. rf=0% para Sharpe y Sortino en todos los cálculos del paper.
+5. Cash y rf para Sharpe/Sortino usan 3M T-bill mensual de Refinitiv/Federal Reserve.
 6. Declarar siempre: sin costes de transacción en el caso base.
 7. El Monte Carlo es la limitación principal — tratar con honestidad.
 

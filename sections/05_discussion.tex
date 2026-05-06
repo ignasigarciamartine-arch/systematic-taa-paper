@@ -25,7 +25,7 @@ The result was a cumulative gain of $+17.64\%$ during a period when the S\&P 500
 lost $-33.05\%$ (Table~\ref{tab:crisis}).
 
 The crash filter also performed correctly in the 2020 COVID episode.
-It triggered nine times over the March 2020 -- May 2023 window,
+It triggered seven times over the March 2020 -- May 2023 window,
 capturing the initial equity collapse (March--April 2020) and several
 subsequent volatility spikes, while not over-triggering during the prolonged
 2020--2021 recovery rally.
@@ -35,29 +35,29 @@ property required for a corporate treasury mandate.
 \subsection{The Cost of Capital Protection}
 
 Protection is not free.
-The regime analysis (Table~\ref{tab:regimes}) shows that the strategy underperforms
-the 60/40 benchmark by $-2.49$ pp in BULL regimes, which account for 55.7\% of
-the 2008--2025 sample.
-This underperformance stems from the absolute momentum threshold ($\theta = 2\%$):
-when assets with positive but modest momentum scores fall below the threshold,
-the portfolio shifts partially to defensive assets, missing the upside of
-a sustained risk-on rally.
+The regime analysis (Table~\ref{tab:regimes}) shows that the strategy's relative
+edge is concentrated in SIDEWAYS and CRISIS regimes, while the BEAR regime remains
+weak and statistically fragile because it contains only nine months.
+The cost of protection comes from the absolute momentum threshold
+($\theta = 2\%$): when assets with positive but modest momentum scores fall below
+the threshold, the portfolio may shift to defensive assets and miss part of a
+sustained risk-on recovery.
 
 Two observations mitigate this cost.
 First, the strategy remains in offensive mode the majority of the time: the
 overall defensive allocation rate is approximately 16\% of all months,
-and 94\% in BULL regimes.
+and 94.1\% in BULL regimes.
 Second, and more fundamentally, the design objective is not to maximise
 CAGR unconditionally but to satisfy a hard drawdown constraint of $-15\%$
 while delivering returns above a 7\% corporate threshold.
-The strategy achieves both: full-period CAGR of 11.27\% and maximum
-drawdown of $-13.87\%$ throughout the entire 2008--2025 period.
-The BULL-regime underperformance is the actuarial premium paid
-for downside protection.
+The strategy achieves both: full-period CAGR of 11.47\% and maximum
+drawdown of $-13.79\%$ throughout the entire 2008--2025 period.
+The weak BEAR-regime result is the clearest actuarial premium paid
+for downside protection, although that regime contains only nine observations.
 
 \subsection{Out-of-Sample Stability}
 
-The OOS CAGR of 12.05\% marginally exceeds the in-sample CAGR of 10.88\%.
+The OOS CAGR of 12.54\% exceeds the in-sample CAGR of 10.94\%.
 This result should not be over-interpreted: it reflects the specific character
 of the 2020--2025 period, which combined high equity volatility
 (COVID crash, 2022 inflation shock, 2025 tariff shock) with periodic
@@ -66,7 +66,7 @@ architecture is most advantageous.
 
 More meaningful is the absence of performance degradation.
 In the TAA literature, OOS decay relative to in-sample is a standard finding
-\citep{harvey2016}, driven by overfitting, data-mining bias, and regime change.
+\citep{harvey2018}, driven by overfitting, data-mining bias, and regime change.
 The fact that crash-filter triggers in the OOS period (9 times)
 align with genuine stress events---not false positives in benign markets---
 is qualitative evidence that the filter captures a persistent economic mechanism
@@ -80,41 +80,48 @@ fitted to historical crashes.
 
 \subsection{Monte Carlo: Honest Appraisal of Uncertainty}
 
-The circular block bootstrap results (Table~\ref{tab:montecarlo}) reveal
-a meaningful gap between the historical CAGR (11.27\%) and the bootstrap
-median (7.09\%).
-This gap is not evidence against the strategy; it is evidence of path dependence.
-The historical sequence---a deep crisis followed by a prolonged bond rally,
-followed by a recovery, followed by another volatility regime---was
-unusually favourable for a crash-detection strategy.
-By scrambling that sequence, the bootstrap produces a range of plausible
-alternative histories in which the strategy performs more modestly.
+The stationary block bootstrap (Table~\ref{tab:montecarlo}) assesses sequencing
+risk: how sensitive CAGR and maximum drawdown are to the order in which the
+historically realised strategy returns arrive.
+The 10th-percentile CAGR of 8.24\% remains above the 7\% corporate threshold
+across adverse orderings, and 96.2\% of simulated paths exceed that threshold.
+Drawdown outcomes are more path-dependent: between 30\% and 34\% of paths
+(depending on block length) breach the $-15\%$ constraint, confirming that
+drawdown control is a historical property of the return sequence rather than a
+distributional guarantee.
 
-Two aspects of the bootstrap distribution deserve attention for the
-corporate treasury context.
-The 10th percentile CAGR of 2.59\% remains positive, suggesting
-the strategy avoids destruction of capital across a wide range of
-simulated environments.
-More importantly, the bootstrap does not model the drawdown path:
-the strategy's downside control comes from the crash filter,
-which activates unconditionally whenever the breadth signal is triggered,
-regardless of the broader return sequence.
-For a corporate treasurer, the relevant guarantee is the drawdown cap,
-not the CAGR realisation---and that guarantee is structural rather than
-statistical.
+The paired bootstrap provides a stronger claim on relative performance.
+Across 98.2\% of simulated orderings S3.6 outperforms the 60/40 benchmark in
+CAGR, and across 95.8\% in Sharpe ratio.
+These figures indicate that the outperformance is not sensitive to the specific
+sequence of monthly returns realised over the sample period.
+The Ledoit--Wolf \citeyearpar{ledoitwolf2008} test yields $p = 0.068$ for the
+Sharpe difference; with 214 monthly observations this is consistent with a
+true outperformance that a longer sample would confirm at conventional
+significance levels, but the evidence with the current sample remains
+suggestive rather than conclusive.
+
+This distinction matters for corporate treasury interpretation.
+The crash filter provides a transparent rule for reducing exposure during
+broad market stress, but it is not a statistical guarantee that every possible
+ordering of returns would respect the $-15\%$ drawdown constraint.
+The correct conclusion is narrower and more defensible: the strategy satisfied
+the drawdown mandate historically and out-of-sample; sequencing-risk analysis
+shows the outperformance is robust to reorderings of the realised returns,
+while the formal Sharpe test cannot reject equality at 5\%.
 
 \subsection{Transaction Costs and Practical Feasibility}
 
 The base backtest reports gross performance, consistent with the
 academic convention for systematic strategy evaluation.
 The UCITS analysis provides a clean estimate of transaction cost impact:
-using Interactive Brokers fee schedules (fixed rate of \$0.005 per share,
-minimum \$1.00 per order), commission drag is approximately 0.36 pp per annum,
-reducing the gross CAGR of 12.71\% (UCITS, March 2019--March 2026)
-to approximately 12.35\% net.
+using Interactive Brokers fee schedules for LSE-listed ETFs (0.05\% of order
+value, minimum \$1.00 per order), commission drag is approximately 0.72 pp per
+annum in the 82-transition cost window, reducing gross CAGR from 13.07\% to
+12.35\% net.
 
 Applying the same drag estimate to the full-period results yields a net CAGR
-of approximately 10.91\%, which remains comfortably above the 7\% corporate
+of approximately 10.75\%, which remains comfortably above the 7\% corporate
 return target.
 The modest drag reflects the monthly rebalancing frequency and the concentrated
 three-asset portfolio, which require fewer transactions per period than
@@ -145,7 +152,7 @@ at the time are excluded by construction.
 This introduces a mild upward bias in the estimated opportunity set.
 
 \textit{Small BEAR regime sample.}
-The BEAR regime classification contains only four months
+The BEAR regime classification contains only nine months
 (Table~\ref{tab:regimes}), which is insufficient for statistical inference.
 The reported CAGR of $-30.28\%$ for the strategy in that regime reflects
 very few and specific observations and should not be extrapolated.

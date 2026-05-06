@@ -133,6 +133,6 @@ report = "\n".join(lines)
 print(report)
 
 out_file = RESULTS_DIR / 's36_crisis_report.txt'
-with open(out_file, 'w') as f:
+with open(out_file, 'w', encoding='utf-8') as f:
     f.write(report)
 print(f"\nSaved: {out_file}")

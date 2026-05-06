@@ -1,41 +1,128 @@
 % ============================================================
-% SECTION 2: Literature Review
-% Status: DRAFT — to be written
-% ============================================================
-
 \section{Literature Review}
 \label{sec:literature}
+% ============================================================
 
-% ANCHOR CHAIN (no Optimum3 — anchor in primary academic sources):
-%
-% 2.1 Asset allocation and diversification
-%   - Markowitz (1952): mean-variance, correlation as diversification tool
-%   - Black & Litterman (1992): portfolio optimization with views
-%
-% 2.2 Momentum in asset markets
-%   - Jegadeesh & Titman (1993): cross-sectional momentum (stocks)
-%   - Moskowitz, Ooi & Pedersen (2012): time-series momentum across asset classes
-%   - Asness, Moskowitz & Pedersen (2013): value and momentum everywhere
-%
-% 2.3 Tactical asset allocation: trend and absolute momentum
-%   - Faber (2007): 10-month SMA timing → basis for absolute momentum
-%   - Antonacci (2012, 2014): dual momentum — relative + absolute
-%   - Multi-period momentum averaging (13612U derivation from above)
-%
-% 2.4 Drawdown control and crash detection
-%   - Keller & Keuning (2017): Hybrid Asset Allocation (HAA) — SSRN 3002624
-%     → introduces breadth/canary mechanism → DIRECTLY citable academic paper
-%   - Harvey et al. (2018): the impact of volatility targeting on drawdowns
-%
-% 2.5 Corporate treasury and cash management
-%   - Graham & Harvey (2001): corporate cash management practices survey
-%   - Bates, Kahle & Stulz (2009): why do firms hold so much cash?
-%   - (small literature → this paper fills the gap)
-%
-% NOTE: Keller & Butler (Optimum3) is a practitioner white paper (SSRN), not
-% peer-reviewed. We DO NOT cite it. HAA (Keller & Keuning 2017) IS peer-reviewed
-% on SSRN and is the legitimate academic source for the breadth filter mechanism.
+\subsection{Portfolio Theory and Rule-Based Allocation}
 
-% TODO: write 1,000–1,500 words covering the 5 subsections above.
+Modern portfolio theory establishes diversification as the central mechanism for
+reducing portfolio risk.
+\citet{markowitz1952} show that portfolio choice depends not only on expected
+returns and variances, but also on the covariance structure among assets.
+This insight is directly relevant for multi-asset ETF allocation: a portfolio
+formed from individually attractive assets can still be fragile if those assets
+share the same downside exposure.
+Later allocation frameworks, such as Black-Litterman \citep{black1992}, address
+the instability of expected-return estimation by combining equilibrium returns
+with investor views, but they still require modelling assumptions that may be
+difficult to govern in a corporate treasury setting.
 
-\end{document}
+Rule-based TAA offers a different route.
+Instead of estimating a full set of expected returns and covariances, the
+allocation is driven by transparent signals, fixed eligibility criteria, and
+predefined rebalancing rules.
+Our strategy remains connected to the diversification logic of
+\citet{markowitz1952} through its minimum-correlation triplet rule, but avoids
+mean-variance optimisation and the associated sensitivity to estimated inputs.
+This is important for implementation: a corporate user must be able to explain
+why the portfolio changed, not only observe that an optimiser produced a new
+weight vector.
+
+\subsection{Momentum and Trend Following Across Asset Classes}
+
+Momentum is one of the most extensively documented regularities in financial
+markets.
+\citet{jegadeesh1993} document cross-sectional momentum in equities, showing
+that past winners tend to outperform past losers over intermediate horizons.
+\citet{moskowitz2012} extend the evidence to time-series momentum across futures
+markets, finding that an asset's own past return predicts its subsequent return
+across equities, bonds, currencies, and commodities.
+\citet{asness2013} further show that momentum is present across asset classes
+and geographies, suggesting that the phenomenon is not confined to a single
+market segment.
+
+This literature provides the empirical basis for momentum-based asset rotation.
+For long-only TAA, \citet{faber2007} shows that a simple moving-average rule can
+improve drawdowns in a diversified asset portfolio, while \citet{antonacci2014}
+popularises dual momentum, combining relative momentum across assets with an
+absolute trend filter.
+Our approach follows the same broad logic but differs in two respects.
+First, momentum is measured through a multi-period score based on 1-, 3-, 6-,
+and 12-month returns, reducing dependence on a single horizon.
+Second, asset selection is not based solely on rank: among eligible assets, the
+portfolio chooses the lowest-correlation triplet, explicitly linking trend
+following with diversification.
+
+\subsection{ETF-Based Tactical Asset Allocation}
+
+Exchange-traded funds make systematic multi-asset allocation operationally
+feasible because they provide liquid exposure to broad asset classes at low cost.
+Several studies examine ETF-based or global asset-allocation strategies that
+combine momentum, trend following, and risk control.
+\citet{clare2016} show that trend following and momentum can improve global asset
+allocation when combined with risk-parity ideas.
+\citet{bellu2020} propose Protected Adaptive Asset Allocation, a momentum-based
+framework that shifts toward cash protection during adverse conditions.
+\citet{yang2019} analyse tactical allocation rules while emphasising the risk of
+data snooping, an issue that is particularly relevant for parameter-rich
+backtests.
+
+Recent work continues to support the relevance of momentum for global allocation.
+\citet{wu2017} study momentum in a strategic asset-allocation framework and show
+that momentum changes optimal demand relative to myopic allocation.
+\citet{wouassom2022} document global momentum effects across international equity
+markets, and \citet{vukovic2023} report time-series momentum evidence for
+European equity indices.
+These papers motivate the use of momentum as a systematic signal, but they do
+not address the specific corporate treasury objective of maintaining a hard
+drawdown ceiling while avoiding leverage and derivatives.
+
+\subsection{Crash Detection and Drawdown Management}
+
+Momentum strategies can perform poorly around sharp reversals and early recovery
+periods.
+\citet{daniel2016} document momentum crashes and show that losses can cluster in
+panic states and rebounds.
+This creates a direct problem for corporate cash management: a strategy that
+delivers attractive average returns but fails during abrupt market transitions
+does not satisfy the treasury mandate.
+
+Breadth-based defensive signals offer one response to this problem.
+\citet{keller2017} introduce breadth momentum in the Vigilant Asset Allocation
+framework, using the fraction of assets with positive momentum as a warning
+indicator for defensive allocation.
+Our crash filter adapts the same intuition in a simpler form.
+Rather than measuring the number of assets with positive momentum, it monitors
+the equal-weighted monthly return of the risky universe.
+When the universe falls broadly enough in a single month, the model treats the
+move as systemic stress and reallocates defensively.
+
+Other downside-control approaches use explicit risk optimisation.
+\citet{guo2023}, for example, combine time-series momentum with conditional
+value-at-risk constraints and show improvements in downside-adjusted
+performance.
+Our contribution is deliberately simpler: the crash-control mechanism is a
+monthly rule rather than an optimisation problem.
+This makes the strategy easier to audit and more compatible with governance
+processes in corporate treasury.
+
+\subsection{Corporate Cash Management}
+
+The corporate finance literature explains why firms hold cash but provides less
+direct guidance on how excess cash should be invested once liquidity needs are
+met.
+\citet{bates2009} document a long-run increase in corporate cash holdings and
+relate it to precautionary motives, changing firm characteristics, and cash-flow
+risk.
+\citet{graham2001} show that corporate financial decisions in practice are shaped
+by risk management, flexibility, and managerial constraints, not only by
+textbook value-maximisation models.
+
+This paper connects those corporate finance concerns with the TAA literature.
+The objective is not to propose a replacement for operating cash or legally
+restricted liquidity reserves.
+Instead, we evaluate whether a transparent, monthly, ETF-based allocation rule
+can be used for a portion of strategic corporate cash where the firm seeks a
+higher return than cash instruments while imposing a strict drawdown limit.
+That framing distinguishes the strategy from generic wealth-management TAA and
+defines the empirical tests reported below.

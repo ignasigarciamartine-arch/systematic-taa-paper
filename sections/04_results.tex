@@ -1,61 +1,292 @@
 % ============================================================
-% SECTION 4: Results
-% Status: DRAFT — to be written
-% Numbers from: 01_TFM/redaccion/RESULTS.md (source of truth)
-% ============================================================
-
 \section{Results}
 \label{sec:results}
+% ============================================================
 
-% ---- 4.1 In-Sample Performance (Train: 2008–2019) ----
-% Strategy evolution table (Table X):
-%   Base momentum (13612U, θ=2%):  CAGR 7.64%, Sharpe 0.762, MaxDD -13.28%
-%   + Enhanced Defensive (TLT+IEF): CAGR 9.72%, Sharpe 0.891, MaxDD -13.87%
-%   + Crash Filter (τ=-4%):         CAGR 10.88%, Sharpe 0.991, MaxDD -13.87%
-%   60/40 benchmark:                CAGR ~7%, MaxDD ~-29%
-% Interpretation: each layer adds value; crash filter most impactful
+\subsection{In-Sample Performance and Strategy Evolution}
 
-% ---- 4.2 Crash Filter Threshold Sensitivity ----
-% Table: τ ∈ {-2%...-5%} → CAGR, Sharpe, MaxDD, #crashes
-% τ=-4% is a robust choice: flat optimum between -4% and -5%
-% (Table 9 from RESULTS.md — all numbers verified)
+Table~\ref{tab:evolution} shows how each component of the strategy contributes
+incrementally to in-sample performance over 2008--2019.
+The base strategy (momentum signal alone, with cash as the defensive asset)
+achieves a CAGR of 8.75\% and a Sharpe ratio of 0.823.
+Replacing the cash defensive allocation with an enhanced defensive mode
+(TLT + IEF) raises CAGR to 10.75\% (+2.00 pp) and Sharpe to 0.933,
+confirming the value of the flight-to-quality mechanism during stress periods.
+Adding the market-breadth crash filter further improves CAGR to 10.94\% (+0.19 pp)
+and Sharpe to 0.951, while leaving maximum drawdown controlled at $-13.79\%$.
 
-% ---- 4.3 Out-of-Sample Performance (OOS: 2020–2025) ----
-% S3.6 OOS: CAGR 12.05%, Sharpe 1.291, MaxDD -12.52%, 9 crash triggers
-% 60/40 benchmark: CAGR 5.89%, MaxDD -29.24%
-% Key events: COVID crash (Mar 2020), rate hike cycle (2022), Tariff Shock (2025)
-% OOS CAGR > Train CAGR → no sign of overfit in base metrics
+\begin{table}[H]
+\centering
+\caption{Strategy evolution --- in-sample performance (2008--2019, 142 months)}
+\label{tab:evolution}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Strategy & Component added & CAGR & Sharpe & Max DD \\
+\midrule
+Base (momentum + cash) & 13612U, $\theta=2\%$, triplet & 8.75\% & 0.823 & $-14.02\%$ \\
++ Enhanced defensive  & TLT+IEF in defensive mode     & 10.75\% & 0.933 & $-13.79\%$ \\
+\textbf{Full strategy}& \textbf{Crash filter} $\tau=-4\%$ & \textbf{10.94\%} & \textbf{0.951} & $\mathbf{-13.79\%}$ \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\footnotesize
+Note: Sharpe computed from monthly excess returns over the 3-month U.S. T-bill rate.
+\end{flushleft}
+\end{table}
 
-% ---- 4.4 Full Period Performance (2008–2025) ----
-% S3.6: CAGR 11.27%, Sharpe 1.081, MaxDD -13.87%, Total Return +571.6%
-% 60/40: CAGR 5.89%, MaxDD -29.24%, Total Return +165%
-% Table: S3.6 vs 60/40 vs B&H EW15
+\subsection{Crash Filter Threshold Sensitivity}
 
-% ---- 4.5 Crisis Period Analysis ----
-% GFC (Jan 2008 – Jun 2009): S3.6 +17.64% vs 60/40 -33% (approx) → 6 crash triggers
-% COVID (Mar 2020 – May 2023): S3.6 +27.43%, lower Sharpe than 60/40 in this window
-% Tariff Shock (Mar–Apr 2025): S3.6 +6.78%, S&P 500 -6.67%, 0 crash triggers
-% Interpretation: strategy excels in sudden crashes; underperforms in prolonged bull
+Table~\ref{tab:threshold_sensitivity} reports in-sample performance
+across seven candidate values of the crash threshold $\tau$.
+The CAGR profile is broadly flat between $\tau = -4.0\%$ and $\tau = -5.0\%$,
+suggesting the selected value of $-4.0\%$ lies in a stable region of the
+parameter space rather than at a sharp optimum.
+Lower thresholds (closer to zero) over-trigger the filter and reduce
+offensive exposure, while higher thresholds miss genuine crash signals.
 
-% ---- 4.6 Market Regime Analysis ----
-% Table: BULL/SIDEWAYS/BEAR/CRISIS by SPY momentum
-% S3.6 dominates in SIDEWAYS (+4.90pp) and CRISIS (+6.07pp)
-% S3.6 underperforms in BULL (-2.55pp) — cost of defensive allocation
-% BEAR: 4 months only — not statistically significant
+\begin{table}[H]
+\centering
+\caption{Crash filter threshold sensitivity --- in-sample (2008--2019)}
+\label{tab:threshold_sensitivity}
+\small
+\begin{tabular}{R{2.2cm}cccc}
+\toprule
+Threshold $\tau$ & CAGR & Sharpe & Max DD & Triggers \\
+\midrule
+$-2.0\%$ & 10.94\% & 0.945 & $-13.79\%$ & 28 \\
+$-2.5\%$ & 10.36\% & 0.901 & $-13.79\%$ & 19 \\
+$-3.0\%$ & 10.47\% & 0.916 & $-13.79\%$ & 16 \\
+$-3.5\%$ & 10.47\% & 0.916 & $-13.79\%$ & 16 \\
+$\mathbf{-4.0\%}$ & \textbf{10.94\%} & \textbf{0.951} & $\mathbf{-13.79\%}$ & \textbf{12} \\
+$-4.5\%$ & 10.76\% & 0.934 & $-13.79\%$ & 10 \\
+$-5.0\%$ & 10.81\% & 0.938 & $-13.79\%$ & 8  \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\footnotesize
+Note: Selected threshold in bold. Sharpe computed from monthly excess returns
+over the 3-month U.S. T-bill rate.
+\end{flushleft}
+\end{table}
 
-% ---- 4.7 Monte Carlo Robustness ----
-% Method: circular block bootstrap, block=6m, N=10,000, seed=42
-% S3.6 median CAGR: 7.09% | 60/40 median: ~5%
-% P10/P50/P90: 2.59% / 7.09% / 12.18%
-% Honest limitation: median degrades from 10.88% historical → sequencing dependency
-% Fan chart figure
+\subsection{Out-of-Sample Performance}
 
-% ---- 4.8 UCITS Implementation ----
-% Phase 3 results (Mar 2019 – Mar 2026): CAGR 12.71% gross / 12.35% net (IBKR)
-% UCITS vs USA same period: virtually identical CAGR, minor tracking difference
-% Practical implication: strategy is implementable in European regulatory framework
+Table~\ref{tab:oos} reports out-of-sample performance over 2020--2025,
+a 72-month window covering COVID-19, the 2022 inflation/rate shock,
+and the April 2025 tariff shock.
+The strategy achieves OOS CAGR of 12.54\%, Sharpe of 1.029, and
+maximum drawdown of $-10.84\%$, all comparable to or better than in-sample
+figures.
+The OOS window confirms that the in-sample drawdown control does not collapse
+when exposed to a previously unseen sequence of market shocks.
 
-% TODO: write full results section ~2,500 words.
-% Tables: use \begin{table}[H]\centering\begin{tabular}{...}\toprule...\bottomrule
+\begin{table}[H]
+\centering
+\caption{Out-of-sample performance (2020--2025, 72 months)}
+\label{tab:oos}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+& CAGR & Vol & Sharpe & Sortino & Max DD & Crash triggers \\
+\midrule
+Full strategy & 12.54\% & 9.30\% & 1.029 & 1.808 & $-10.84\%$ & 9 \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\footnotesize Note: Sharpe and Sortino use monthly excess returns over the
+3-month U.S. T-bill rate.
+\end{flushleft}
+\end{table}
 
-\end{document}
+\subsection{Full-Period Performance}
+
+\begin{table}[H]
+\centering
+\caption{Full-period performance (2008--2025, 214 months)}
+\label{tab:full}
+\small
+\begin{tabular}{lccccccc}
+\toprule
+& CAGR & Vol & Sharpe & Sortino & Max DD & Win Rate & Final (\$10k) \\
+\midrule
+Full strategy & 11.47\% & 10.41\% & 0.974 & 1.788 & $-13.79\%$ & 69.6\% & \$69{,}365 \\
+60/40         & 6.16\%  & 9.68\%  & 0.535 & 0.768 & $-29.24\%$ & 63.6\% & \$29{,}057 \\
+B\&H EW15     & 2.54\%  & 11.99\% & 0.163 & 0.218 & $-39.71\%$ & 59.3\% & \$15{,}636 \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\footnotesize
+Note: Full-period CAGR of strategy exceeds the 7\% corporate target threshold.
+Maximum drawdown of $-13.79\%$ satisfied the hard constraint MaxDD $> -15\%$
+throughout the historical sample; the bootstrap in Section~\ref{sec:montecarlo}
+shows this is not guaranteed under all return orderings.
+Sharpe and Sortino use monthly excess returns over the 3-month U.S. T-bill rate.
+\end{flushleft}
+\end{table}
+
+Figure~\ref{fig:equity_curves} plots the equity curves of the strategy
+and the 60/40 benchmark over the full 2008--2025 period.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/G1_equity_curves_full.png}
+\caption{Equity curves, 2008--2025 (\$10{,}000 initial capital).
+Full strategy (solid) vs.\ 60/40 benchmark (dashed).}
+\label{fig:equity_curves}
+\end{figure}
+
+\subsection{Crisis Period Analysis}
+
+Table~\ref{tab:crisis} reports performance during three major stress episodes.
+The crash filter is most valuable during the Global Financial Crisis:
+with 6 triggers in 16 months, the strategy returns $+17.64\%$ versus
+a loss of $-33.05\%$ for the S\&P 500.
+During the COVID aftermath period, the strategy underperforms equities
+in absolute terms ($+30.21\%$ vs $+41.04\%$), reflecting the opportunity
+cost of defensive allocation during the sharp 2020--2021 rally.
+The Tariff Shock of March--April 2025 shows zero drawdown for the strategy
+versus $-6.67\%$ for equities, despite zero crash filter triggers,
+illustrating that momentum positioning alone can sidestep short-term shocks
+when the portfolio is already in defensive assets.
+
+\begin{table}[H]
+\centering
+\caption{Performance during crisis episodes}
+\label{tab:crisis}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Episode & Period & Strategy & S\&P 500 & Max DD & Triggers \\
+\midrule
+Global Financial Crisis  & Jan 2008 -- Jun 2009 & $+17.64\%$ & $-33.05\%$ & $-7.88\%$  & 6 \\
+COVID \& Aftermath       & Mar 2020 -- May 2023 & $+30.21\%$ & $+41.04\%$ & $-10.84\%$ & 7 \\
+Tariff Shock             & Mar -- Apr 2025      & $+6.78\%$  & $-6.67\%$  & $0.00\%$   & 0 \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\footnotesize
+Note: Returns are total returns for each episode window.
+\end{flushleft}
+\end{table}
+
+\subsection{Market Regime Analysis}
+
+Table~\ref{tab:regimes} classifies each month into one of four regimes
+based on SPY's trailing 6-month momentum and drawdown, following a
+hierarchical scheme: CRISIS (6-month drawdown $< -10\%$),
+BEAR (6-month momentum $< -5\%$), BULL ($\geq +5\%$), and SIDEWAYS (otherwise).
+
+The strategy's defensive rate varies markedly across regimes: just 5.9\%
+in BULL markets versus 66.7\% in CRISIS periods.
+The strategy delivers its strongest relative outperformance in CRISIS
+(+52.02 pp vs.\ 60/40) and SIDEWAYS (+3.46 pp) regimes.
+In BEAR markets the strategy underperforms by $-43.77$ pp, but this estimate
+is based on only nine months and should not be interpreted as stable.
+
+\begin{table}[H]
+\centering
+\caption{Performance by market regime (2008--2025)}
+\label{tab:regimes}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+Regime & Months & \% Time & Strategy CAGR & 60/40 CAGR & Difference & Def.\ \% \\
+\midrule
+BULL     & 119 & 56.7\% & 16.20\% & 15.21\% & $+0.98$ pp & 5.9\%  \\
+SIDEWAYS & 64  & 30.5\% & 8.41\%  & 4.96\%  & $+3.46$ pp & 18.8\% \\
+BEAR     & 9   & 4.3\%  & $-23.18$\% & 20.59\% & $-43.77$ pp & 66.7\% \\
+CRISIS   & 18  & 8.6\%  & 14.74\% & $-37.28$\% & $+52.02$ pp & 66.7\% \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\footnotesize
+Note: BEAR regime contains only 9 months; differences not statistically significant.
+Def.\%: fraction of months in defensive mode within each regime.
+\end{flushleft}
+\end{table}
+
+\subsection{Monte Carlo Robustness}
+\label{sec:montecarlo}
+
+To assess sequencing risk in the realised return stream, we apply a stationary
+block bootstrap \citep{politisromano1994} with data-driven block length
+\citep{politiswhite2004} and $N = 10{,}000$ simulations on the realised
+strategy monthly returns.
+The stationary bootstrap draws blocks of geometrically distributed length,
+ensuring each synthetic path is itself stationary and avoiding the wrap-around
+artefact of the circular bootstrap.
+The optimal block length, estimated from the strategy return series via the
+method of \citet{politiswhite2004}, is $b = 3$ months, consistent with the
+weak serial dependence (lag-1 autocorrelation: $-0.11$) of the monthly return
+stream.
+The strategy and 60/40 benchmark returns are resampled jointly with the same
+block indices (paired bootstrap), so outperformance probabilities are computed
+under identical sequence orderings.
+This test does not re-optimise parameters or re-estimate signals; it evaluates
+how sensitive CAGR, maximum drawdown, and relative performance are to the order
+in which the historically realised returns arrive.
+
+Table~\ref{tab:montecarlo} reports the bootstrap distribution.
+The median CAGR of 11.45\% closely matches the historical 11.47\%; this
+near-equality is a mathematical consequence of resampling from the fixed
+realised return set and confirms correct implementation rather than
+constituting evidence of strategy robustness.
+The 10th-percentile CAGR is 8.24\%, remaining above the 7\% corporate
+threshold; only 3.8\% of paths fall below that threshold
+(P(CAGR $\geq 7\%$) $= 96.2\%$).
+Drawdown outcomes are more path-dependent: the 10th-percentile simulated
+maximum drawdown is $-19.43\%$, and the fraction of paths satisfying
+MaxDD $> -15\%$ ranges from 65.6\% at block length $b = 3$ to 70.2\% at
+$b = 6$, illustrating residual sensitivity to autocorrelation structure.
+The historical drawdown constraint should therefore be interpreted as an
+observed backtest property, not a guarantee across all return orderings.
+
+The paired bootstrap provides additional evidence on relative performance.
+In 98.2\% of simulated orderings S3.6 CAGR exceeds the 60/40 CAGR, and in
+95.8\% the Sharpe ratio exceeds that of 60/40, indicating that the
+outperformance is not an artefact of the specific sequence of returns realised
+between 2008 and 2025.
+The Ledoit--Wolf \citeyearpar{ledoitwolf2008} test of
+$H_0\colon \text{SR}(\text{S3.6}) = \text{SR}(\text{60/40})$ yields a Sharpe
+difference of $+0.44$ (annualised; 95\% CI: $[-0.03,\, +0.91]$; $p = 0.068$).
+The interval marginally includes zero, so the null cannot be rejected at the
+conventional 5\% level with 214 monthly observations; the evidence is
+suggestive but not conclusive.
+
+\begin{table}[H]
+\centering
+\caption{Monte Carlo bootstrap --- return distribution (N = 10{,}000)}
+\label{tab:montecarlo}
+\small
+\begin{tabular}{lccccc}
+\toprule
+& P10 & P25 & P50 & P75 & P90 \\
+\midrule
+Full strategy CAGR    & 8.24\%       & 9.71\%       & 11.45\%      & 13.24\%      & 14.82\% \\
+Maximum drawdown      & $-19.43$\%   & $-16.27$\%   & $-13.55$\%   & $-11.30$\%   & $-9.61$\% \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\footnotesize
+Note: Stationary block bootstrap \citep{politisromano1994} of realised strategy
+returns, optimal block length $b = 3$ months \citep{politiswhite2004},
+214-month horizon, $N = 10{,}000$ simulations.
+Historical CAGR (2008--2025): 11.47\%; historical maximum drawdown: $-13.79\%$.
+P(CAGR $\geq 7\%$) $= 96.2\%$; P(MaxDD $> -15\%$) $= 65.6\%$ ($b=3$) to
+$70.2\%$ ($b=6$); P(both constraints) $= 64.7\%$.
+Paired outperformance: P(S3.6 CAGR $>$ 60/40 CAGR) $= 98.2\%$;
+P(S3.6 Sharpe $>$ 60/40 Sharpe) $= 95.8\%$.
+\end{flushleft}
+\end{table}
+
+\subsection{UCITS Implementation}
+
+To validate applicability for European-domiciled entities,
+we replace the US ETFs with UCITS-compliant equivalents and
+re-run the strategy over March 2019 -- March 2026 (83 months).
+The UCITS strategy achieves a gross CAGR of 12.71\% over 83 months.
+In the 82-transition transaction-cost window, the gross CAGR is 13.07\%
+and the net CAGR is 12.35\% using Interactive Brokers fee schedules.
+Commission drag is approximately 0.72 pp per annum, confirming that
+transaction costs reduce but do not erase the strategy's performance profile.

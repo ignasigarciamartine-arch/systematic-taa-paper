@@ -23,29 +23,36 @@ redirecting capital to long-duration treasuries or cash before
 momentum-based exits can trigger.
 
 Over the full 2008--2025 backtest period, the strategy achieves a CAGR
-of 11.27\% with a Sharpe ratio of 1.081 and a maximum drawdown of $-13.87\%$,
+of 11.47\% with a Sharpe ratio of 0.974 and a maximum drawdown of $-13.79\%$,
 satisfying the hard constraint throughout.
-Out-of-sample performance over 2020--2025 (CAGR 12.05\%, Sharpe 1.291)
+Out-of-sample performance over 2020--2025 (CAGR 12.54\%, Sharpe 1.029)
 is comparable to in-sample results, providing evidence against overfitting.
 A UCITS-compliant European implementation over March 2019 -- March 2026
-achieves a net-of-commissions CAGR of 12.35\%, confirming cross-market
-applicability and demonstrating that transaction cost drag of approximately
-0.36 pp per annum does not materially alter the performance profile.
+achieves a gross CAGR of 12.71\%; in the 82-transition transaction-cost
+window, net CAGR is 12.35\% after an estimated commission drag of
+approximately 0.72 pp per annum.
+This confirms cross-market applicability while keeping implementation costs
+explicit.
 
 During the Global Financial Crisis---the most severe stress episode in the
 sample---the strategy returns $+17.64\%$ while equities lose $-33.05\%$,
 demonstrating that the crash filter captures the flight-to-quality mechanism
 in real time rather than in hindsight.
-In BULL regimes, the strategy underperforms the 60/40 benchmark by a modest
-margin, reflecting the actuarial cost of downside protection.
-Monte Carlo analysis confirms that the historical outperformance is
-path-dependent; the 10th-percentile bootstrap CAGR of 2.59\% remains positive,
-suggesting that capital preservation is maintained across a wide range of
-simulated return environments.
+In CRISIS regimes, the strategy materially outperforms the 60/40 benchmark,
+while the small BEAR-regime sample remains a limitation.
+Return-level Monte Carlo analysis indicates that the realised strategy return
+sequence is not unusually fragile (10th-percentile CAGR of 8.34\%), but
+simulated drawdowns can breach the historical $-15\%$ threshold.
+The stricter strategy-level bootstrap is more cautionary: when synthetic
+multi-asset histories are generated and the rule is re-executed, S3.6 beats
+60/40 in CAGR in only 25.6\% of simulations.
+Drawdown control and benchmark outperformance should therefore be interpreted as
+historical and out-of-sample properties of the realised regime sequence, not as
+statistical guarantees.
 
 These results contribute to the literature on rule-based TAA in two ways.
-First, they demonstrate that a drawdown-constrained strategy can deliver
-equity-like returns over a full market cycle without recourse to leverage,
+First, they demonstrate that a drawdown-constrained strategy historically
+delivered equity-like returns over a full market cycle without recourse to leverage,
 options overlays, or complex optimisation---a finding relevant for the
 majority of corporate treasury functions that operate under strict
 risk governance constraints.
@@ -74,4 +81,3 @@ and short-duration government bonds.
 The crash filter is the key differentiator; without it, the strategy
 delivers returns but not the drawdown control that defines the
 corporate mandate.
-
