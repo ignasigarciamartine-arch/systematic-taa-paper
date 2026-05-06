@@ -1,7 +1,44 @@
 # STATUS -- Paper
 > Actualizar siempre al cerrar sesion.
 
-## Estado actual (05 May 2026 -- sesion 5)
+## Estado actual (06 May 2026 -- sesion 6)
+
+### Cambios sesion 06 May 2026
+
+**Monte Carlo — revisión crítica y upgrade a v3:**
+- Auditados todos los MC existentes: v1 (return-level circular), strategy-level daily, v2 (monthly stationary strategy-level).
+- Conclusión: strategy-level MC produce resultados no citables para estrategias momentum. Daily bootstrap destruye la señal (P50 CAGR=4.45%); monthly stationary la amplifica artificialmente (P50 CAGR=26.85%). Ambos eliminados.
+- Creado `code/s36_montecarlo_v3.py` — tres mejoras sobre v1:
+  1. Stationary Bootstrap (Politis & Romano 1994) en lugar de circular; bloque óptimo b=3m (Politis & White 2004).
+  2. Paired bootstrap con 60/40 (mismos índices de bloque): P(S3.6 CAGR > 60/40)=98.2%, P(Sharpe)=95.8%.
+  3. Ledoit-Wolf (2008) Sharpe ratio test: diff=+0.44, p=0.068, 95% CI [-0.03, +0.91].
+- Verificaciones cuantitativas completas: fórmula LW correcta, t-stat scale-invariant, P50≈histórico (correcto por construcción), outperformance no inflado (z=2.01 analítico = 97.8% ≈ bootstrap 98.2%), estabilidad P10 (std=0.043pp en 200 meta-bootstraps).
+- Issue identificado y declarado: P(MaxDD>-15%) sensible a block length: 65.6% (b=3) vs 70.2% (b=6). Reportado como rango en el paper.
+- LW CI incluye cero → declarado honestamente: p=0.068, no significativo al 5%.
+
+**Limpieza código:**
+- Eliminados: `s36_montecarlo_strategy.py`, `s36_montecarlo_strategy_collect.py`, `s36_montecarlo_v2.py`, `run_montecarlo_strategy_blocks.py`.
+- `s36_montecarlo.py` renombrado a `s36_montecarlo_v1_circular.py` (referencia histórica).
+- `run_all.py` actualizado para usar v3.
+
+**Limpieza outputs:**
+- Eliminados: strategy-level raw/reports (smoke + full), v2 raw/report, carpetas `montecarlo/` y `montecarlo_checkpoints/`.
+- Quedan: `s36_montecarlo_v3_raw.csv`, `s36_montecarlo_v3_report.txt`, v1 raw/report/block_sensitivity como referencia.
+
+**Paper actualizado:**
+- `sections/04_results.tex`: tabla MC reemplazada con números v3; segunda tabla strategy-level eliminada; texto refactorizado con stationary bootstrap + paired + LW.
+- `sections/05_discussion.tex`: sección MC reescrita; eliminada sección strategy-level; LW p-value declarado honestamente.
+- `paper.bib`: añadida entrada `ledoitwolf2008`.
+- Commit `55150c2` pusheado a `github.com/ignasigarciamartine-arch/systematic-taa-paper.git` rama `main`.
+
+### Proxima accion
+1. Decidir framing final (S3.6 vs framework modular) — Francesc.
+2. Decidir journal target — Francesc.
+3. Enlazar figuras G2–G7 en los .tex (actualmente solo G1 enlazada).
+4. Compilar PDF (LaTeX en el equipo).
+5. Revisar todo el paper end-to-end cuando esté compilado.
+
+---
 
 ### Cambios sesion 05 May 2026
 - Auditoría completa de coherencia numérica entre .tex, outputs y RESULTS.md.
