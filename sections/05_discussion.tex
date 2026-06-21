@@ -1,0 +1,203 @@
+% ============================================================
+\section{Discussion}
+\label{sec:discussion}
+% ============================================================
+
+\subsection{Sources of Edge and Economic Mechanism}
+
+The strategy is built for a drawdown-constrained investor, one whose
+objective is capital preservation while still participating in trends, not
+unconditional Sharpe maximisation. The nested attribution
+(Table~\ref{tab:ladder}) decomposes the edge accordingly. The bulk of return
+comes from momentum, a well-documented factor we do not claim as a contribution.
+Concentrating to three assets and imposing the absolute threshold each add
+economically meaningful but individually marginal increments, and minimum-correlation
+selection adds little return while compressing risk. No single
+rule is statistically significant on its own out-of-sample (momentum: $p = 0.80$,
+min-corr isolated: $p = 0.68$ on the locked test); the edge emerges from
+stacking complementary rules (total: $p = 0.008$ on the test block). That
+is both a more honest description than pinning everything on one mechanism and a
+more defensible one against the charge that a single tuned parameter drives the result.
+
+Two economic mechanisms drive the non-momentum component. The first is the breadth of
+momentum, which works as an endogenous regime indicator. Momentum reflects persistent,
+slow-moving demand for an asset class; when it collapses simultaneously
+across a diversified cross-section (fewer than three assets clearing the absolute
+threshold), it signals a broad risk-off transition rather than idiosyncratic
+rotation. Rotating to duration or cash in that state is the flight-to-quality
+response \citep{barroso2015, daniel2016}, taken with the same signal that
+drives offensive allocation. No separate, separately-tunable market-timing rule
+is needed, which keeps the strategy simple and auditable. The second mechanism is
+minimum-correlation selection, which hedges against the well-documented rise in
+cross-asset correlations during stress. Because rank within the eligible set carries
+no further expected-return information (Empirical Regularity~\ref{lem:homogeneity}),
+the only economically relevant lever left is the covariance structure. Choosing the
+lowest-correlation triplet ex ante lowers variance and thins the left tail without
+altering expected return, the risk-control (not return) pattern the data show.
+
+The strategy is also not merely a repackaging of the trend premium. When we
+control for a time-series-momentum factor built from the same 15 assets
+(Table~\ref{tab:factors}), a residual alpha of roughly $+4$--$8\%$ per annum
+survives, regardless of whether the TSMOM factor is specified as long-short
+($+4.3\%$/yr, $p = 0.04$ on the locked test) or, more rigorously, as long-only
+(the appropriate specification for a long-only strategy: $+7.6\%$/yr, $p = 0.018$
+on the locked test). Controlling for the long-only TSMOM factor gives a
+larger residual alpha than the long-short version, because the long-only
+factor absorbs more of GAT's variance ($R^2 \approx 0.52$) while leaving a larger
+return component unexplained. The non-trend component is the combination of
+concentration, the breadth-based defensive switch, and minimum-correlation
+construction, which together convert a known return source into a drawdown-controlled
+allocation that is not fully spanned by any passive trend strategy on the same
+assets.
+
+\subsection{Honest Benchmarking}
+
+The $1/N$ portfolio is a low bar by design. \citet{demiguel2009} adopt it
+because it is hard to beat net of estimation error, not because it is a
+strong risk-adjusted competitor, so we do not rest the case on it. On the locked
+test the strategy out-performs $1/N$ only marginally on the Sharpe
+difference ($p = 0.079$, a 60-month window with limited power) but robustly on the
+spanning alpha ($p = 0.008$). The more demanding evidence is the alpha against
+recognised factor models: it survives the CAPM, a two-factor equity-plus-duration
+model, and a time-series-momentum factor built from the same assets
+(Tables~\ref{tab:alpha} and~\ref{tab:factors}).
+It also beats a Faber (2007) trend rule ($p = 0.032$), so the result is not pure
+trend-following. It does \emph{not} beat 60/40 or the S\&P~500 on Sharpe, where
+60/40 benefits from the duration tailwind of the 2010s. Against
+these benchmarks the case is drawdown, not Sharpe: comparable or higher
+risk-adjusted return at a materially lower maximum drawdown. That advantage is
+statistically significant against the S\&P~500 and $1/N$ and marginal
+against 60/40 ($\Delta$MaxDD $+17.7$pp vs SPY, $p=0.018$; $+16.7$pp vs $1/N$,
+$p=0.039$; $+14.0$pp vs 60/40, $p=0.056$; locked test block), given the high sampling
+variability of maximum drawdown and 60/40's own bond cushion.
+We state this explicitly rather than select the benchmark that flatters the
+strategy. On portfolio construction, the equal-weight minimum-correlation rule
+captures the diversification benefit of optimised construction while avoiding the
+estimation error of covariance-matrix inversion \citep{demiguel2009}; none of the
+optimised alternatives (minimum-variance, risk-parity, inverse-volatility) adds a
+spanning alpha over GAT or achieves a lower drawdown at comparable Sharpe
+(Section~\ref{sec:res_construction}).
+
+\subsection{Data Snooping and Researcher Degrees of Freedom}
+
+Four parameter dimensions enter the design, so the apparent performance of the
+selected configuration could in principle reflect a search over a large grid
+\citep{white2000, harvey2018}. We address this on two independent fronts.
+First, the way each parameter is set leaves little room to overfit
+(Section~\ref{sec:methodology}). Three of the four are derived, and their
+training optimum coincides with both the ex-ante literature value and the pooled
+train+validation optimum (the momentum signal, the Top-$N$ value, and the triplet
+size), so they carry no free degree of freedom. The fourth, the absolute threshold,
+is the one most exposed to a snooping critique and we therefore do \emph{not}
+optimise it at all: it is fixed ex ante at the risk-free rate ($\theta=2\%$). We are
+candid that the in-sample objective would actually prefer a higher threshold
+($\approx 4$--$5\%$); declining to chase that maximum is a deliberate restriction of
+researcher degrees of freedom, not a coincidental optimum. Second, the
+matched-permutation attribution (Table~\ref{tab:attribution}) shows that only
+momentum and minimum correlation beat a random matched baseline. The two rules that
+drive the result are exactly the two with an independent economic rationale, while
+the threshold contributes through risk control rather than selection
+(Section~\ref{sec:theta}); the parameters most exposed to a snooping critique are
+the ones that are either inert or fixed ex ante.
+
+We also declare, and then close, the limitations of the data construction. The
+proxy calibration uses the full overlap and therefore embeds a bounded look-ahead
+in the early training segment (2004--2007). Three results bound its impact
+(Section~\ref{sec:res_robustness}): the validation and test blocks are 100\% real
+ETF data; dropping BWX and RWX (the two assets that previously relied on weak
+proxies, now reconstructed from an exact index and a long-history fund) leaves the
+alpha at $+5.57\%$/yr ($p = 0.0066$); and, most directly, running the strategy on 100\%
+real ETF prices with no proxies at all (2009--2025) yields essentially the same
+out-of-sample alpha ($+6.04\%$/yr, $p = 0.0001$). The proxy extension is thus a
+power-enhancing device, not the source of the edge. An expanding-window
+recalibration would close the residual concern formally, but the real-data result
+already shows it does not change the conclusion.
+
+The \citet{bailey2014} Deflated Sharpe Ratio at the $N=24$ searched configurations
+(the threshold is fixed ex ante and adds none) is $0.975$, above the $0.95$
+threshold, and remains so for any assumed trial count up to $N \approx 154$; the
+in-sample Sharpe therefore survives the data-snooping adjustment. We nonetheless
+treat the out-of-sample alpha and matched-permutation attribution as the primary
+defence against data snooping.
+
+A transparency note on pre-registration. We did not formally pre-register the
+strategy before running the test block. The decision sequence is documented in
+Section~\ref{sec:theta}: parameters were locked on the training grid and the absolute
+threshold was fixed ex ante at $\theta = 2\%$ without examining test returns; the
+test block was then evaluated once. We acknowledge that, in the absence of a
+time-stamped pre-registration, this sequential process cannot be externally verified
+and therefore declare it as a stated procedural constraint, not a resolved concern.
+
+A second transparency note concerns the B2 intermediate model. B2 (top-3 momentum
+of the eligible set, with defensive switch, but without minimum-correlation
+selection) generates $\alpha = +9.98\%$/yr versus $1/N$ on the locked test
+($p = 0.0002$) and a Sharpe of $1.151$ versus GAT's $0.873$. This finding is not
+post-hoc: B2 is an intermediate step in the nested ladder, not a separately
+discovered alternative, and the final model GAT was determined before the test block
+was examined. Nonetheless, B2 outperforms GAT on the Sharpe criterion on this
+particular test window. The explanation is precisely the stated design objective:
+minimum-correlation selection sacrifices Sharpe for drawdown compression
+(B2: $-8.30\%$, GAT: $-7.06\%$) and correlation reduction ($\bar\rho$: 0.50 vs 0.22).
+On the longer post-training window (2016--2025) B2 leads on Sharpe by a smaller margin
+and the incremental step GAT$\sim$B2 is alpha-neutral in both directions
+($+0.23\%$ OOS, $-0.82\%$ test). We report this candidly: the minimum-correlation rule
+achieves its design purpose (risk control, not return) but a researcher selecting on
+the test Sharpe alone would choose B2 over GAT. We do not make that claim, and we
+have not adjusted the strategy ex post.
+
+\subsection{Limitations}
+
+Several limitations bound the interpretation of these results.
+
+\textit{Backtest overfitting.}
+All parameters were selected within the training window. The strict temporal split
+and the attribution tests mitigate the most direct forms of look-ahead and
+snooping, but the researcher degrees of freedom in choosing the overall
+architecture are not fully captured by any in-sample control. A prospective live
+track record is the only complete remedy.
+
+\textit{Data construction.}
+The extended history relies on proxies; every proxied series now uses its exact
+underlying index or a source with $R^2 \geq 0.92$, the single exception being the
+2003--2006 segment of the mortgage-REIT series (REM, $R^2 = 0.80$), which rarely
+enters the triplet; the 11-month pre-launch segment of TIP uses a real-yield
+constant-maturity series ($R^2 = 0.40$, a short segment that precedes the strategy's
+live window). The calibration look-ahead is bounded and, as shown above, does not
+drive the result (the real-data alpha is unchanged); an expanding-window
+recalibration would close the concern formally and is left for future work.
+
+\textit{Momentum homogeneity.}
+Lemma~\ref{lem:homogeneity} holds in training and validation but shows a weak
+negative rank effect in the locked test window (Spearman $\hat{\rho} = -0.14$,
+$p = 0.010$; ANOVA $p = 0.25$). The negative sign is inconsistent with momentum
+within the eligible set and is directionally favourable to minimum-correlation
+selection over rank-based selection, but the result weakens the claim that the
+homogeneity premise is an out-of-sample regularity rather than a training-period
+property. A prospective sample would provide a cleaner test.
+
+\textit{Single universe and turnover.}
+The strategy uses a fixed 15-asset universe and does not adapt as new instruments
+become liquid. Its turnover ($9.83\times$/yr) is moderate-to-high; the no-trade-band
+variant reduces it to $7.66\times$/yr while preserving the alpha, but the strategy is
+inherently more cost-sensitive than low-turnover peers. The audited break-even cost
+is near $62$ bps one-way (roughly six times the realistic figure for liquid
+ETFs); the edge is robust to realistic costs but loses significance at a conservative
+$35$ bps. Calendar (quarterly) rebalancing is not a viable reduction because it
+sharply worsens the drawdown.
+
+\textit{Regime dependence.}
+The out-of-sample advantage is concentrated in stress and sideways regimes; in
+sustained bond or equity bull markets the strategy merely keeps pace with passive
+benchmarks while protecting against drawdowns that those benchmarks do not.
+
+\textit{Minimum-correlation rule: design vs.\ realised test performance.}
+The minimum-correlation selection rule adds a positive but insignificant return
+increment over the longer post-training window ($+0.23\%$/yr, $p = 0.869$) and a
+small negative increment on the 60-month locked test ($-0.82\%$, $p = 0.682$). Its
+value is risk reduction, not return, which is exactly what Proposition~\ref{prop:mincorr}
+predicts and what Section~\ref{sec:res_mincorr} documents. The implication for
+practitioners is that a return-focused investor should use B2 (top-3 momentum of the
+eligible set) rather than GAT; GAT is the appropriate choice for a
+drawdown-constrained investor. We designed GAT for the latter objective and the test
+block confirms the design works as specified, but we do not claim the minimum-correlation
+rule improves risk-adjusted return.

@@ -1,0 +1,113 @@
+% ============================================================
+% Momentum, Breadth, and Correlation in Tactical Asset Allocation: A Rule-by-Rule Attribution
+% Authors: Garcia Martin I., Mases Campos M., Prior Sanz F.
+% Institution: IQS School of Engineering, Universitat Ramon Llull
+% Target: International Review of Economics & Finance (IREF, Elsevier)
+% ------------------------------------------------------------
+% Elsevier elsarticle submission draft.
+%   [review]  -> double-spaced, single-column, line numbers (for referees).
+% For the final typeset version switch [review] to [final,5p] (or [final,1p]).
+% The previous article-class working draft is preserved in git history.
+% ============================================================
+\documentclass[review,12pt]{elsarticle}
+
+% elsarticle loads natbib internally; do NOT load natbib/authblk again.
+\usepackage{amsmath, amssymb}
+\usepackage{amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+% author-year citations to match the existing \citep/\citet calls
+\biboptions{round,authoryear}
+
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+% Theorem environments
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Empirical Regularity}
+
+\journal{International Review of Economics \& Finance}
+
+% ============================================================
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Momentum, Breadth, and Correlation in Tactical Asset
+Allocation: A Rule-by-Rule Attribution}
+
+\author[iqs]{Ignasi Garcia Martin}
+\author[iqs]{Marc Mases Campos}
+\author[iqs]{Francesc Prior Sanz\corref{cor1}}
+\ead{francesc.prior@iqs.url.edu}
+\cortext[cor1]{Corresponding author.}
+
+\affiliation[iqs]{organization={IQS School of Engineering, Universitat Ramon Llull},
+            addressline={Via Augusta 390},
+            postcode={08017},
+            city={Barcelona},
+            country={Spain}}
+
+% ---- Abstract -----------------------------------------------
+\begin{abstract}
+We design and evaluate a fully automated, rule-based tactical asset allocation
+(TAA) strategy that rotates monthly across a diversified universe of 15
+exchange-traded funds (ETFs), without leverage, derivatives, or discretionary
+intervention.
+The strategy combines four components: a multi-period (13612U) momentum score,
+a top-$7$ breadth pre-filter, an absolute-momentum threshold with a
+breadth-based defensive switch, and a minimum-correlation triplet selection rule.
+The primary focus is a transparent, rule-by-rule attribution of the strategy's
+out-of-sample edge rather than the strategy itself.
+
+ETF histories are extended back to 2003 using documented proxies (underlying
+indices or calibrated instruments with $R^2 \geq 0.92$) and a strict nested
+temporal split is adopted: three parameters are derived on a 2004--2015 training
+window and confirmed on a 2016--2020 validation window, while the absolute
+threshold is fixed ex ante at the risk-free rate; the frozen strategy is then
+evaluated once on a locked 2021--2025 test block.
+On the test block the strategy attains a CAGR of 11.42\%, a Sharpe ratio of
+0.873, and a maximum drawdown of $-7.06\%$; over the full 2004--2025 period it
+attains 11.00\%, 0.892, and $-11.86\%$.
+
+A matched-permutation test finds that the momentum rule beats a random matched
+baseline on the Sharpe ratio ($p = 0.0025$) and the minimum-correlation rule
+contributes through variance reduction (variance ratio $1.28$, $p = 0.010$)
+rather than return; a nested spanning-alpha ladder shows the edge arises from
+stacking complementary rules.
+The resulting spanning alpha against $1/N$ on the locked test is $+6.9\%$ per
+annum ($p = 0.008$), survives joint controls for equity, duration, and a
+time-series-momentum factor, and passes a Deflated Sharpe ratio correction at
+$0.975$.
+\end{abstract}
+
+\begin{keyword}
+Tactical asset allocation \sep momentum \sep minimum-correlation portfolios \sep
+drawdown control \sep data snooping \sep spanning regressions \sep ETF rotation \sep
+out-of-sample validation
+\end{keyword}
+
+\end{frontmatter}
+
+% ============================================================
+\input{sections/01_introduction}
+\input{sections/02_literature}
+\input{sections/03_methodology}
+\input{sections/04_results}
+\input{sections/05_discussion}
+\input{sections/06_conclusion}
+\input{sections/07_appendix}
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{paper}
+
+\end{document}

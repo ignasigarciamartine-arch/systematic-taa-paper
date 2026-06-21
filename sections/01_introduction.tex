@@ -1,0 +1,130 @@
+% ============================================================
+\section{Introduction}
+\label{sec:introduction}
+% ============================================================
+
+Rule-based tactical asset allocation (TAA) strategies are popular precisely
+because they are transparent: an allocation is driven by a handful of explicit
+rules (a momentum signal, a ranking cutoff, an absolute-trend filter, a
+portfolio-construction criterion) rather than by an opaque optimiser.
+Momentum, the workhorse signal of these rules, is one of the most robust
+regularities in asset markets, both cross-sectionally and as a time-series effect
+across asset classes \citep{jegadeesh1993, moskowitz2012, asness2013}.
+Yet that same transparency raises a question the literature rarely answers head on.
+Among the several rules a typical strategy stacks, which ones actually generate the
+out-of-sample edge, which are inert, and is the whole thing anything more than a
+repackaged time-series-momentum (trend) premium? Without an answer, a favourable
+backtest is hard to tell apart from the product of a parameter search
+\citep{yang2019, harvey2018}.
+
+This paper takes one concrete cross-asset momentum strategy and treats it as a case
+study for exactly that question. We derive each rule on a locked training window and
+then decompose its out-of-sample performance rule by rule. The tools are a
+matched-permutation (skill-versus-luck) test and a nested spanning-alpha ladder, and
+we then put the residual edge through controls for known risk factors (including a
+trend factor built from the same assets), transaction costs, a multiple-testing
+adjustment, and a replication on 100\% real data. The strategy itself is designed
+under a hard drawdown-control objective, which we keep as the evaluation criterion.
+But the contribution is the attribution, not the strategy.
+
+The strategy under study combines four components.
+First, a multi-period (13612U) momentum score averages 1-, 3-, 6-, and 12-month
+signals to reduce dependence on any single lookback horizon.
+Second, a top-$7$ breadth pre-filter restricts the candidate set to the
+higher-momentum half of the universe.
+Third, an absolute-momentum threshold defines an eligible set and drives a
+breadth-based defensive switch: when fewer than three assets clear the threshold,
+the cross-section of momentum has broadly deteriorated and the portfolio rotates
+to long- and intermediate-duration treasuries, or to cash if bond momentum is also
+negative \citep{keller2017, antonacci2014}.
+Fourth, a minimum-correlation triplet selection rule implements the central
+diversification insight of modern portfolio theory \citep{markowitz1952} by
+holding the three lowest-correlation assets among the eligible candidates.
+Regime detection is thus driven by the \emph{breadth of momentum} (the count of
+assets clearing the absolute threshold) rather than by a separate market-return
+trigger.
+
+We evaluate the strategy on a universe of 15 diversified ETFs covering global
+equities, real estate, commodities, and fixed income; exchange-traded funds make
+systematic multi-asset rotation operationally feasible by providing liquid,
+low-cost exposure to broad asset classes.
+Because the ETFs were launched between 2002 and 2008, a real-ETF backtest is too
+short for a powered train/validation/test design; we therefore extend each series
+back to 2003 using documented proxies (underlying indices or OLS-calibrated
+correlated instruments), with the data-construction choices and their limitations
+reported in Section~\ref{sec:methodology}.
+The empirical design uses a strict nested temporal split: the momentum signal, the
+breadth count, and the triplet size are derived on the 2004--2015 training window
+(each lands on its ex-ante literature value) and confirmed on a 2016--2020
+validation window, while the absolute threshold is fixed ex ante at the risk-free
+rate rather than optimised; the frozen strategy is then evaluated once on a locked
+2021--2025 test block. Supporting robustness analyses are reported over the broader
+post-training sample (2016--2025) for statistical power.
+The out-of-sample windows span the COVID-19 crash (validation) and the 2022
+inflation and rate shock and 2023--2025 recovery (test).
+
+The main result is that the strategy delivers competitive risk-adjusted returns
+with materially lower drawdowns than passive benchmarks.
+Over the full 2004--2025 period it achieves a CAGR of 11.00\%, a Sharpe ratio of
+0.892, and a maximum drawdown of $-11.86\%$.
+On the locked test block (2021--2025) it achieves a CAGR of 11.42\%, a Sharpe ratio
+of 0.873 (the highest of the benchmark panel), and a maximum drawdown of $-7.06\%$,
+roughly one-third that of $1/N$ ($-23.8\%$), 60/40 ($-21.1\%$), and the S\&P~500
+($-24.8\%$).
+
+The paper makes three contributions.
+The central one is a transparent, two-pronged attribution
+framework for rule-based TAA strategies, deployed here on a concrete four-rule
+strategy as a case study. The framework combines a matched-permutation
+(skill-versus-luck) test, which replaces each rule's informed decision with a random
+draw from the same feasible set, with a nested incremental spanning-alpha ladder
+that isolates each rule's marginal out-of-sample contribution. The resulting
+decomposition is more informative, and more defensible against
+data-snooping charges, than either a single in-sample optimisation or an aggregate
+out-of-sample test. Applied to GAT, it finds that the momentum rule beats its
+matched random baseline ($p = 0.0025$); the minimum-correlation rule contributes
+through variance reduction (variance ratio $1.28$, $p = 0.010$) rather than
+through return; and the remaining parameters, fixed ex ante in flat regions of the
+objective, are statistically indistinguishable from random matched choices. The
+incremental ladder tells the same story. No single rule is individually significant
+in isolation; the edge emerges from stacking complementary rules, and the
+combination is what generates the alpha.
+The second contribution is a formal and empirical account of the minimum-correlation
+construction. Proposition~\ref{prop:mincorr} shows analytically that, within a
+momentum-screened eligible set with homogeneous expected returns, the
+minimum-average-correlation triplet is the minimum-variance equal-weight portfolio.
+The data then show that this is precisely its empirical role. It compresses
+portfolio variance and tail risk at statistically equal expected
+return and without inverting a covariance matrix, so the gain is risk control rather
+than return. Reporting a null return contribution
+alongside a significant risk contribution is, we argue, an honest finding with direct
+implications for anyone designing multi-rule TAA systems: the rule earns its
+place through drawdown compression, not alpha.
+The third contribution is breadth of evidence for the spanning alpha.
+The locked test block delivers $+6.9\%$ per annum against $1/N$ ($p = 0.008$) and
+a residual of $+4$--$5\%$/yr against joint controls for equity, duration, and a
+long-only time-series-momentum factor built from the same 15 assets. That long-only
+factor is the hardest appropriate control for a long-only strategy, and GAT still
+clears it ($+7.6\%$/yr against
+TSMOM$_{\text{LO}}$, $p = 0.018$; $+4.3\%$ against the standard long-short
+TSMOM, $p = 0.04$, both on the locked test). The rest of the robustness battery
+points the same way. Realistic transaction costs (break-even
+$\approx 62$ bps against $10\times$/yr turnover), temporal stability, universe
+perturbation, a Deflated Sharpe ratio of $0.975$, and a replication on 100\% real
+ETF data each fail to overturn the result. We also confront the strategy's main
+practical weakness, its tax inefficiency relative to buy-and-hold: the tax drag is
+real ($\approx 3$ percentage points of annual return), yet GAT retains the highest
+after-tax Sharpe of the benchmark panel (Section~\ref{sec:res_tax}).
+The strategy itself is transparent, reproducible, and implementable with monthly
+ETF trades, but our central message is methodological: the attribution framework
+reveals where a rule-based TAA edge comes from and, equally important, where it
+does not.
+
+The remainder of the paper is structured as follows.
+Section~\ref{sec:literature} reviews the relevant literature.
+Section~\ref{sec:methodology} describes the strategy design and data.
+Section~\ref{sec:results} reports in-sample performance, the rule-by-rule
+attribution, out-of-sample and full-period results, and the robustness battery.
+Section~\ref{sec:discussion} discusses what the attribution implies about the
+source of the edge.
+Section~\ref{sec:conclusion} concludes.

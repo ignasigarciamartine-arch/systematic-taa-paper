@@ -1,0 +1,64 @@
+% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+% ============================================================
+
+This paper designs, derives, and evaluates a fully automated, rule-based tactical
+asset allocation strategy. It rotates monthly across 15 diversified ETFs, with no
+leverage, no derivatives, and no discretionary intervention. Four components make it
+up: a multi-period (13612U) momentum score, a top-7 breadth pre-filter, an
+absolute-momentum threshold that drives a breadth-based defensive switch, and a
+minimum-correlation triplet selection rule. Every parameter is derived on the
+2004--2015 training window, confirmed (for the triplet size) on a 2016--2020
+validation window, and evaluated once on a locked 2021--2025 test block.
+
+The headline numbers are competitive. Over the full 2004--2025 period the strategy
+attains a CAGR of 11.00\%, a Sharpe ratio of 0.892, and a maximum drawdown of
+$-11.86\%$. On the locked test block it attains 11.42\%, 0.873, and $-7.06\%$: the
+highest Sharpe of the benchmark panel, at roughly one-third the drawdown of $1/N$,
+60/40, and the S\&P~500. Against naive $1/N$ on the test the edge is marginal on the
+Sharpe difference ($p = 0.079$) but robust on a Newey--West spanning alpha
+($+6.88\%$/yr, $p = 0.008$), which also holds against the CAPM and a two-factor
+equity-plus-duration model. The strategy also beats a Faber (2007) trend rule
+($p = 0.032$), so the edge is not merely trend-following. Against 60/40 and the
+S\&P~500 it matches Sharpe while controlling drawdown far more tightly.
+
+Three contributions follow. The first gives minimum-correlation triplet selection a
+formal optimality footing (Proposition~\ref{prop:mincorr}), then shows empirically
+that the rule's value is risk control: it cuts variance and tail risk at
+statistically equal expected return, and we present it as such rather than as a
+return enhancement. The second is a transparent, two-pronged defence against data
+snooping. One prong is a matched-permutation test, in which the momentum rule beats
+chance on the Sharpe ratio and the minimum-correlation rule beats chance through
+variance reduction; the other is a nested incremental spanning-alpha ladder that
+attributes the edge to stacking complementary rules rather than to any single one.
+The third is robustness where it matters. The outperformance survives a joint
+control for equity, duration, and a generic trend factor (residual alpha
+$\approx +5\%$/yr, so it is not merely trend-following), realistic transaction costs
+(break-even one-way cost near $62$ bps against a measured turnover of $10\times$ per
+year), both halves of the sample, a Deflated Sharpe ratio of $0.975$, and, most
+directly, 100\% real (non-proxy) ETF data.
+
+We are explicit about what the strategy does \emph{not} establish. It does not beat
+a 60/40 portfolio on a risk-adjusted basis; its advantage over $1/N$ is marginal on
+the Sharpe difference and rests more securely on the spanning alpha; and its
+moderate-to-high turnover makes net performance more cost-sensitive than
+low-turnover peers, though a no-trade-band variant reduces turnover while preserving
+the alpha. These are stated openly because the strategy's credibility rests on
+honest accounting, not on the headline.
+
+Several extensions follow naturally. A no-trade-band implementation widens the cost
+margin, whereas calendar rebalancing does not, because it worsens drawdown. An
+expanding-window proxy recalibration would formally close the residual look-ahead
+concern, already shown immaterial on real data. A prospective live implementation
+would supply the only fully out-of-sample evidence free of the researcher degrees of
+freedom that attach to any backtest. A formal replication on UCITS-listed
+equivalents would test whether the edge survives the instrument substitution
+required for European retail investors; a preliminary prototype on 14 LSE-listed
+equivalents (REM excluded; SCZ replaced by WOSC.L, IEF by IDTM.L) already replicates
+the post-training spanning alpha ($\alpha = +6.81\%$/yr, $p = 0.0006$ over
+2016--2025). The core message is narrow and defensible. A simple, auditable,
+four-rule allocation strategy earns a spanning alpha over a naive diversified
+benchmark, sourced from momentum and risk-controlled by minimum-correlation
+construction, while keeping drawdowns well inside those of passive multi-asset
+portfolios.

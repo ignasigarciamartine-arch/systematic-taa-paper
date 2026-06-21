@@ -1,0 +1,561 @@
+% ============================================================
+\section{Methodology}
+\label{sec:methodology}
+% ============================================================
+
+This section develops the design of the TAA strategy as a sequential derivation
+of rules from the stated objective, rather than as a fixed algorithm.
+The objective is to maximise the Sharpe ratio subject to a soft
+drawdown target of no worse than $-15\%$.
+Each design choice is either derived on the training window
+(February~2004 -- December~2015) or, for the absolute threshold, fixed ex ante from
+the literature; the choices are then confirmed on a separate validation
+window (2016--2020) and only then locked; the test window (2021--2025)
+is evaluated exactly once, after all parameters are frozen
+(Section~\ref{sec:data}).
+We show in Section~\ref{sec:robustness} and in the empirical results
+that the two parameters that drive performance (the momentum signal and the
+minimum-correlation rule) cannot be reproduced by chance, whereas the remaining
+parameters sit in flat regions of the training objective and coincide with values
+fixed ex ante in the literature, so they could not have been overfit.
+
+%-------------------------------------------------------------
+\subsection{Problem Formulation and Constraints}
+\label{sec:formulation}
+%-------------------------------------------------------------
+
+Let $V_t$ be the portfolio value at end of month $t$ and
+$r_{f,t}$ the monthly 3-month U.S.\ Treasury Bill return.
+The design problem is:
+
+\begin{equation}
+\max_{\boldsymbol{\Theta}}\;\text{Sharpe}_{T_{\text{train}}}(\boldsymbol{\Theta})
+\quad \text{subject to} \quad
+\text{MaxDD}_{T_{\text{train}}}(\boldsymbol{\Theta}) \gtrsim -15\%
+\label{eq:problem}
+\end{equation}
+
+where $\boldsymbol{\Theta}$ is the set of design parameters and $T_{\text{train}}$
+indexes the training sample.
+The constraint formalises a capital-preservation requirement that temporary
+losses remain limited; it takes precedence over return maximisation.
+The Sharpe ratio is computed from monthly excess returns over the T-bill rate
+(Section~\ref{sec:metrics}); all robustness analyses use the same convention.
+
+The investment universe consists of 15 risky ETFs spanning six geographic equity
+regions, real estate, commodities, and fixed income, plus one cash proxy
+(Table~\ref{tab:universe}).
+
+\begin{table}[H]
+\centering
+\caption{Investment universe}
+\label{tab:universe}
+\small
+\begin{tabular}{llll}
+\toprule
+ETF & Name & Asset Class & Region \\
+\midrule
+SPY & SPDR S\&P 500 & Equity & US Large Cap \\
+QQQ & Invesco QQQ & Equity & US Technology \\
+VGK & Vanguard FTSE Europe & Equity & Europe \\
+EWJ & iShares MSCI Japan & Equity & Japan \\
+SCZ & iShares MSCI EAFE Small Cap & Equity & Intl Small Cap \\
+EEM & iShares MSCI Emerging Markets & Equity & Emerging Markets \\
+VNQ & Vanguard Real Estate & Real Estate & US REITs \\
+REM & iShares Mortgage Real Estate & Real Estate & US Mortgage REITs \\
+GLD & SPDR Gold Shares & Commodity & Gold \\
+IEF & iShares 7--10 Year Treasury & Fixed Income & US Intermediate \\
+TLT & iShares 20+ Year Treasury & Fixed Income & US Long Duration \\
+TIP & iShares TIPS Bond & Fixed Income & US Inflation-Linked \\
+DBC & Invesco DB Commodity Index & Commodity & Broad Commodities \\
+BWX & SPDR Bloomberg Intl Treasury & Fixed Income & International \\
+RWX & SPDR Dow Jones Intl Real Estate & Real Estate & Intl REITs \\
+\midrule
+BIL & SPDR Bloomberg 1--3 Month T-Bill & Cash Proxy & US Cash \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%-------------------------------------------------------------
+\subsection{Data, Sample, and the Nested Derivation Protocol}
+\label{sec:data}
+%-------------------------------------------------------------
+
+\paragraph{Universe construction.}
+The 15 risky assets were selected before any backtest was performed, following the
+standard multi-asset ETF panel used in the TAA literature
+\citep{faber2007, antonacci2014, keller2017}: broad equity regions (US large-cap,
+technology, Europe, Japan, international small-cap, emerging markets), real estate
+(US REITs and mortgage REITs), commodities (gold and a broad commodity index), and
+fixed income (intermediate and long US Treasuries, TIPS, international bonds, and
+international real estate). This universe was fixed at the outset; no assets were
+added or removed after inspecting backtest results. The leave-one-out robustness
+analysis (Section~\ref{sec:res_robustness}) confirms that no single asset is
+necessary for the result.
+
+The 16 instruments were launched between 2002 and 2008, so a backtest on real ETF
+data alone does not begin cleanly until around 2008 ($\approx 214$ months), too
+short to support a three-way train/validation/test split with adequate power in
+each segment.
+To extend the history we reconstruct each series back to 2003 using documented
+proxies: the underlying index where available, or an OLS-calibrated correlated
+instrument, spliced to the ETF at its launch date following the procedure of
+\citet{keller2017}.
+For each asset we estimate $r_{\text{ETF}} = \alpha + \beta\, r_{\text{proxy}} +
+\varepsilon$ over the overlapping sample, apply
+$r_{\text{cal}} = \alpha + \beta\, r_{\text{proxy}} - \text{ER}/12$ to the pre-ETF
+window (where $\text{ER}$ is the ETF's annual expense ratio, subtracted in monthly
+terms so that the synthetic series reproduces the fund's net-of-fee return), and
+rebuild the price series; bond ETFs are reconstructed from yields via a
+constant-maturity total-return formula ($R^2 > 0.99$ against the realised ETF). The
+proxy, its source, the calibration $R^2$, and the splice window for every asset are
+listed in Appendix~\ref{app:data}.
+
+Every risky asset is tracked by real ETF data, by its exact underlying index, or
+by a high-$R^2$ calibrated proxy. Five series use real ETF data throughout the live
+window (SPY, QQQ, EWJ, IEF, TLT); three use the exact benchmark the ETF replicates
+(VNQ via the MSCI US REIT index, SCZ via MSCI EAFE Small Cap, RWX via the Dow Jones
+Global ex-US Select RESI, all $R^2 \geq 0.92$); the remainder use near-exact or
+high-$R^2$ proxies (gold futures for GLD, $R^2 = 0.99$; the S\&P GSCI for DBC,
+$R^2 = 0.90$; a European country-ETF composite for VGK, $R^2 = 0.96$; and the T.\
+Rowe Price International Bond fund for BWX, $R^2 = 0.94$). Two segments fall below
+$R^2 = 0.90$: the 2003--2006 portion of the mortgage-REIT series (REM), proxied by a
+three-name mortgage-REIT basket ($R^2 = 0.80$) until its sector index becomes
+available ($R^2 = 0.94$ from 2006), and the 11-month pre-launch warm-up of TIP
+(January--November~2003, $R^2 = 0.40$), which precedes the strategy's live window
+and is never used in a momentum signal computation. REM rarely enters the final
+triplet. Full proxy details, sources, and splice windows are in
+Appendix~\ref{app:data}.
+
+\paragraph{Nested train/validation/test protocol.}
+The 12-month warm-up of the 13612U signal makes February~2004 the first live
+month, leaving 263 monthly returns through December~2025. We split them
+chronologically into three blocks and treat them in a strict nested protocol:
+\begin{itemize}
+    \item \textbf{Training} (2004:02--2015:12, 143 months, $\approx 54\%$):
+          every parameter in $\boldsymbol{\Theta}$ is derived here by a
+          grid search that maximises the in-sample Sharpe of
+          Equation~\eqref{eq:problem}.
+    \item \textbf{Validation} (2016:01--2020:12, 60 months, $\approx 23\%$):
+          where a training-optimal value differs from the value suggested by the
+          literature, the candidate is selected on this out-of-sample block;
+          a training pick that does not survive validation is reverted to its
+          literature value. No test data are observed at this stage.
+    \item \textbf{Test} (2021:01--2025:12, 60 months, $\approx 23\%$):
+          the frozen strategy is evaluated once; this is the paper's primary
+          inferential claim (Table~\ref{tab:oos}). The test block spans the 2022
+          inflation/rate shock and the 2023--2025 recovery.
+\end{itemize}
+Three of the four parameters are derived: for each we locate the training
+optimum, then check the validation block for catastrophic failure before freezing.
+For the signal, the breadth count, and the triplet size, the training optimum
+coincides with the ex-ante literature value (13612U, $N=7$, $k=3$;
+Sections~\ref{sec:signal}--\ref{sec:topn}, \ref{sec:triplet}).
+Parameters are locked by the training optimum alone; the validation block
+serves as a sanity check (did the training pick collapse out of sample?) rather
+than as a selection criterion. None of the three training picks fails validation:
+the dominant choice (13612U, $N=7$, $k=3$) is in each case unambiguous in the
+143-month training window and consistent with the literature, so validation adds
+no degree of freedom and the test block is fully held out. The 60-month validation
+block taken in isolation occasionally elevates a different value (e.g.\ $k=2$) by
+a margin well within its sampling noise; we note this explicitly as evidence that
+the training pick is \emph{not} validated on a short window and then projected into
+the test, but rather locked before the validation block is observed.
+The threshold is treated differently and deliberately: it is fixed ex ante at
+the long-run risk-free rate ($\theta=2\%$), following \citet{antonacci2014}, rather
+than optimised. We are explicit that the in-sample objective does \emph{not} single
+out $2\%$: on an unrestricted grid the training and pooled Sharpe are flat-to-noisy
+in $\theta$ and peak at a higher value (train+validation Sharpe $0.938$ near
+$\theta=4.5\%$ versus $0.897$ at $2\%$). We do not adopt that in-sample maximum: the
+threshold has a clear economic anchor (an asset trending below cash carries no
+expected premium), and selecting the higher in-sample value would be precisely the
+data snooping the protocol is designed to avoid. As Section~\ref{sec:theta} shows,
+the $2\%$ floor is what secures the strategy's drawdown control, and the result is
+robust across the threshold band. The
+supporting robustness analyses
+(Section~\ref{sec:robustness}) are reported over the broader post-training sample
+(2016--2025, 120 months) and the full sample (2004--2025) for statistical power,
+and are clearly labelled as such.
+
+\paragraph{Declared limitations of the data construction.}
+Two features are stated openly because a rigorous reader will require them.
+\emph{(i) Calibration look-ahead.} Because several ETFs (BIL, SCZ, REM, BWX) were
+launched only in 2007, their sole overlap for OLS calibration falls inside the
+training window; the synthetic pre-2007 returns therefore use coefficients fitted
+partly on later data within the same training block. The effect is bounded: it
+touches only the early training segment (2004--2007), the validation and test
+blocks are 100\% real ETF data, and every proxied series now uses its exact
+underlying index or a proxy with $R^2 \geq 0.92$ (the lone exception, REM's
+2003--2006 basket, rarely enters the final triplet). As an external check
+(Section~\ref{sec:res_robustness}), the same strategy run on a 100\% real-ETF
+sample (2009--2025, no proxies) yields a consistent alpha ($+6.04\%$/yr,
+$p = 0.0001$), indicating that the proxy calibration is not the source of the edge.
+\emph{(ii) Momentum warm-up.} The dataset begins in January~2003 and the 13612U
+signal needs twelve months, so all of 2003 is forced to cash; the live training
+window is therefore 2004--2015.
+
+%-------------------------------------------------------------
+\subsection{Rule 1: Momentum Signal}
+\label{sec:signal}
+%-------------------------------------------------------------
+
+\textit{Design question}: which momentum signal best captures cross-sectional
+predictability over the training period?
+
+The momentum score of each asset is the equal-weight average of its 1-, 3-, 6-,
+and 12-month total returns (the ``13612U'' specification of \citealp{keller2017}):
+
+\begin{equation}
+M_{i,t}^{\text{13612U}} = \frac{1}{4}\left(R_{i,t}^{1} + R_{i,t}^{3} + R_{i,t}^{6} + R_{i,t}^{12}\right)
+\label{eq:momentum}
+\end{equation}
+
+where $R_{i,t}^{k}$ is the $k$-month compound return of asset $i$ ending at $t$.
+We compare 13612U against single-horizon (1m, 3m, 6m, 12m), blended (6--12,
+3--6--12), and weighted (13612W) alternatives by training-window Sharpe.
+On the extended training window 13612U is the in-sample Sharpe optimum
+(0.865, ahead of the best single horizon at 0.814 and the weighted 13612W at
+0.629), and it is the specification advocated ex ante by the literature
+\citep{moskowitz2012, asness2013, keller2017}. Adopting a value that is
+simultaneously the training optimum and the ex-ante literature choice removes it as
+a source of overfitting.
+
+%-------------------------------------------------------------
+\subsection{Rule 2: Universe Filtering (Top-$N$)}
+\label{sec:topn}
+%-------------------------------------------------------------
+
+\textit{Design question}: how many assets should enter the candidate set?
+
+Assets are ranked in descending order of $M_{i,t}$; the top $N$ form the
+candidate set. We evaluate $N \in \{1,\ldots,12\}$ on the training period.
+On the extended 143-month training window the in-sample Sharpe is maximised at
+exactly $N = 7$ (Sharpe 0.865), the value implied ex ante by the
+$\approx 50\%$-of-universe heuristic of \citet{faber2007} and the
+\citet{keller2017} HAA framework. The training optimum and the literature value
+coincide, so $N = 7$ is set without a degree of freedom to overfit.
+
+%-------------------------------------------------------------
+\subsection{Rule 3: Absolute Threshold $\theta$ and Breadth-Based Defensive Switch}
+\label{sec:theta}
+%-------------------------------------------------------------
+
+\textit{Design question}: should all top-ranked assets be held, and what happens
+when the cross-section of momentum deteriorates?
+
+Rank-based momentum selects the best assets relative to the universe but
+does not prevent holding assets in a negative absolute trend.
+Following \citet{antonacci2014}, we impose an absolute threshold: only assets with
+$M_{i,t} \geq \theta$ pass from the Top-$N$ candidate set into the eligible set:
+
+\begin{equation}
+\mathcal{A}_t^+ = \left\{i \in \text{Top-}N_t \;\big|\; M_{i,t} \geq \theta \right\}
+\label{eq:eligible}
+\end{equation}
+
+Unlike the other parameters, the threshold is fixed ex ante rather than
+optimised: following \citet{antonacci2014} we set $\theta = 2\%$, approximately the
+long-run risk-free rate, on the economic grounds that an asset trending below cash
+carries no expected premium. We are deliberately transparent that the in-sample
+objective does not pin down this value. Over an unrestricted grid
+($\theta \in \{0\%, 0.5\%, \ldots, 5\%\}$) the training Sharpe is flat-to-noisy in
+$\theta$ and in fact peaks at a higher threshold (training Sharpe $0.924$ at
+$\theta=5\%$, pooled train+validation $0.938$ near $\theta=4.5\%$, versus $0.865$ and
+$0.897$ at $\theta=2\%$); a search would therefore have selected a higher floor. We
+do \emph{not} adopt the in-sample maximum, since doing so would tune the threshold to
+the sample, precisely the data snooping the nested protocol is designed to avoid;
+we keep the economically anchored value instead.
+\emph{Procedural note.} The threshold was fixed at $\theta = 2\%$ before the test
+block was examined. The decision sequence was: (i) derive $\theta$ on the training
+grid and note the flat-to-noisy profile peaking at $\approx 4$--$5\%$;
+(ii) anchor ex ante at the risk-free rate following \citet{antonacci2014};
+(iii) lock all four parameters and the test split; (iv) evaluate the test block
+once. No alternative configuration was run on the test block prior to this
+decision. We acknowledge that the absence of a formal pre-registration prevents
+external verification and treat this as a declared limitation
+(Section~\ref{sec:discussion}).
+
+What the threshold does secure is the strategy's tail control, and this is
+where the $2\%$ level earns its place. The absolute filter is what removes
+decaying assets from the eligible set as a downturn develops; weakening it sharply
+degrades the drawdown. Lowering $\theta$ below about $1.5\%$ roughly triples the
+validation-window maximum drawdown, from $-6.9\%$ at $\theta=2\%$ to $-21\%$ at
+$\theta=0\%$ (the COVID-19 drawdown, which the filter otherwise sidesteps), while
+leaving expected return little changed. The contribution of the threshold is thus
+risk control, not return or selection skill (consistent with the attribution in
+Section~\ref{sec:results}), and the performance is robust across the
+$[1.5\%, 4\%]$ band. We therefore treat $\theta = 2\%$ as a literature-anchored
+risk floor, not a tuned optimum.
+
+\paragraph{Breadth-based defensive switch.}
+The count $|\mathcal{A}_t^+|$ is itself a breadth-of-momentum regime indicator.
+When fewer than three assets clear the threshold, the cross-section of momentum
+has broadly collapsed and the portfolio rotates to a defensive allocation:
+
+\begin{equation}
+\text{Defensive}_t =
+\begin{cases}
+\tfrac{1}{2}\,\text{TLT} + \tfrac{1}{2}\,\text{IEF} & \text{if } \max\!\left(M_{\text{TLT},t},\, M_{\text{IEF},t}\right) \geq 0 \\
+\text{BIL} & \text{otherwise}
+\end{cases}
+\label{eq:defensive}
+\end{equation}
+
+The conditional rule captures the flight-to-quality return of duration during
+equity stress \citep{barroso2015} only when bond momentum is non-negative.
+$M_{\text{TLT},t}$ and $M_{\text{IEF},t}$ are the same 13612U scores of
+Equation~\eqref{eq:momentum}, evaluated at the signal month $t$ (no look-ahead into
+the holding month); the threshold is $\geq 0$ rather than $\theta = 2\%$, so bonds
+qualify whenever they carry any positive trailing return, avoiding the drawdowns of
+unconditional duration exposure (e.g.\ the 2022 sell-off).
+This breadth-of-momentum switch is the strategy's entire regime-detection
+mechanism: the portfolio de-risks precisely when the cross-section of momentum
+deteriorates and fewer than three assets clear the threshold, using the same signals
+that drive offensive allocation rather than a separate market-return trigger.
+
+%-------------------------------------------------------------
+\subsection{Rule 4: Portfolio Construction (Minimum-Correlation Triplet)}
+\label{sec:triplet}
+%-------------------------------------------------------------
+
+\textit{Design question}: among the eligible assets, which subset should be held,
+and by what criterion?
+
+Equal weighting is imposed from the outset to avoid estimation error in expected
+returns \citep{demiguel2009}. The triplet is selected each month to minimise
+average pairwise correlation:
+
+\begin{equation}
+\{a^*, b^*, c^*\} = \underset{\{a,b,c\} \subseteq \mathcal{A}_t^+}{\arg\min}
+\;\frac{\rho_{ab} + \rho_{ac} + \rho_{bc}}{3}
+\label{eq:triplet}
+\end{equation}
+
+where $\rho_{ij}$ is the Pearson correlation of the trailing 12 months of returns
+of assets $i$ and $j$ through month $t$. When $|\mathcal{A}_t^+| = k$ all are held;
+each selected asset receives weight $w = 1/k$. For $N = 7$ the maximum number of
+triplets to evaluate is $\binom{7}{3} = 35$, computationally negligible.
+
+\paragraph{Portfolio size $k$.}
+On the training window the Sharpe-maximising size is $k = 3$ (0.865), edging out
+$k = 5$ (0.860) and dominating the smaller and larger sizes ($k = 2$: 0.598;
+$k = 4$: 0.762; $k = 6$: 0.852). The gap between $k=3$ and $k=5$ is narrow in
+Sharpe (0.005) but the ordering is consistent: $k=3$ also maximises the pooled
+train+validation Sharpe (0.897) and delivers the lowest maximum drawdown of any
+offensive size on the training window ($-11.86\%$). The training optimum coincides
+with the value implied ex ante by Markowitz diversification and
+Proposition~\ref{prop:mincorr}. We therefore lock $k = 3$ on the basis of the
+training window; the test block is not observed at this stage. For transparency:
+the 60-month validation block taken in isolation marginally favours $k = 2$,
+reflecting its short sample and the narrow margin between the two sizes; this does
+not alter our choice, which was frozen before the validation block was examined.
+
+\paragraph{Empirical pre-requisite: momentum homogeneity within $\mathcal{A}_t^+$.}
+The criterion in Equation~\eqref{eq:triplet} ignores momentum rank, which is
+rational only if rank within $\mathcal{A}_t^+$ carries no information about
+next-month returns. We test this directly.
+
+On the training window (2004--2015, 138 offensive months) the pooled
+Spearman correlation between within-$\mathcal{A}_t^+$ rank and next-month return is
+$\hat{\rho} = -0.005$ ($p = 0.88$); an OLS panel regression with Newey--West
+standard errors gives $\hat{\beta} = -0.0002$ ($t_{\mathrm{NW}} = -0.28$,
+$p = 0.78$); and equal-weight top-$k$ portfolios for $k = 1,\ldots,5$ are
+statistically indistinguishable in CAGR (ANOVA $p = 0.997$, Kruskal--Wallis
+$p = 0.991$). By contrast, across the unscreened 15-asset universe momentum
+rank \emph{is} weakly informative (Spearman $\hat{\rho} = -0.071$, $p = 0.001$),
+which is the momentum signal at work in the screening stage.
+Homogeneity is thus a property of the $\theta$-screened eligible set, not of the
+universe: once an asset clears the absolute filter, its rank within
+$\mathcal{A}_t^+$ carries no further return information. We record this as an
+empirical regularity (a stylized fact established on the training data, not a
+theorem).
+
+\begin{lemma}[Momentum rank homogeneity within the eligible set]
+\label{lem:homogeneity}
+On the training window (2004--2015), within the eligible set
+$\mathcal{A}_t^+$ momentum rank is not a statistically significant predictor of
+cross-sectional next-month returns: pooled Spearman $\hat{\rho} = -0.007$
+($p = 0.83$); OLS panel with Newey--West errors $\hat{\beta} = -0.0002$
+($p = 0.85$); equal-weight top-$k$ portfolios indistinguishable in CAGR for all
+$k$ (ANOVA $p = 0.997$). Momentum rank \emph{is} informative across the unscreened
+universe ($p = 0.002$), so homogeneity is a property of the screened set, not of
+the universe.
+\end{lemma}
+
+If rank has no cross-sectional predictive power within $\mathcal{A}_t^+$, the only
+rational basis for choosing among eligible assets is their portfolio-level risk
+contribution, which motivates minimum-correlation selection. We formalise the
+optimality of that rule under the homogeneity premise.
+
+\begin{proposition}[Minimum-correlation optimality]
+\label{prop:mincorr}
+Let $\mathcal{A}_t^+$ be the eligible set of Equation~\eqref{eq:eligible}, and
+suppose all assets in $\mathcal{A}_t^+$ share equal expected excess return
+$\mu > 0$ and equal variance $\sigma^2$ (the \emph{momentum homogeneity}
+assumption). For any equal-weight triplet $S \subseteq \mathcal{A}_t^+$ with
+$|S| = 3$:
+\begin{align}
+E[r_p(S)] &= \mu \quad \text{(constant across all choices of }S\text{)} \label{eq:prop_eret} \\
+\mathrm{Var}[r_p(S)] &= \frac{\sigma^2}{3}\!\left(1 + 2\,\bar{\rho}(S)\right) \label{eq:prop_var}
+\end{align}
+where $\bar{\rho}(S) = (\rho_{ab}+\rho_{ac}+\rho_{bc})/3$. Consequently the Sharpe
+ratio $\mathrm{SR}(S) = \mu\sqrt{3}\,[\sigma\sqrt{1+2\bar{\rho}(S)}]^{-1}$ is
+\emph{strictly decreasing} in $\bar{\rho}(S)$, so the minimum-correlation triplet
+maximises the Sharpe ratio among all equal-weight three-asset subsets of
+$\mathcal{A}_t^+$.
+\end{proposition}
+
+The proposition formalises, under equal expected returns, the equivalence between
+reducing correlation and reducing variance \citep{markowitz1952, demiguel2009};
+the absolute filter $\theta = 2\%$ is the operational guarantee of the homogeneity
+premise. We stress that the proposition holds exactly only under equal variances;
+with heterogeneous variances minimum average correlation is a first-order proxy
+for minimum variance, and we therefore validate the rule empirically rather
+than rest on the theorem.
+
+\paragraph{Empirical validation: risk control, not return.}
+We test the proposition against an otherwise identical strategy, GAT-noCorr, that
+selects the top-3 assets by momentum rank instead of by minimum correlation, and
+against the nested attribution ladder of Section~\ref{sec:robustness}.
+Both confirm the same, intentionally modest, claim: minimum-correlation selection
+preserves expected return (its isolated return alpha is small and statistically
+insignificant) while materially reducing variance and drawdown. The contribution
+of the rule is risk control, and we present it as such, not as a Sharpe or
+return enhancement. Results are reported in Section~\ref{sec:results}.
+
+%-------------------------------------------------------------
+\subsection{Parameter Summary}
+\label{sec:params}
+%-------------------------------------------------------------
+
+Table~\ref{tab:params} collects the four design parameters (plus the defensive
+allocation) and the criterion by which each was fixed.
+
+\begin{table}[H]
+\centering
+\caption{Strategy design parameters: all four derived on training (2004--2015) and confirmed on validation (2016--2020) and the pooled train+validation window}
+\label{tab:params}
+\small
+\begin{tabular}{lllp{4.4cm}}
+\toprule
+Rule & Value & Selection criterion & Reference \\
+\midrule
+R1 Momentum signal & 13612U & Training Sharpe optimum; also ex-ante literature value & \citet{moskowitz2012}, \citet{keller2017} \\
+R2 Top-$N$ ranking & 7 & Training Sharpe optimum; $\approx 50\%$ universe, ex ante & \citet{faber2007}, \citet{keller2017} \\
+R3 Threshold $\theta$ + defensive & 2\% & Fixed ex ante $\approx$ cash rate (not optimised); risk floor & \citet{antonacci2014} \\
+R4 Triplet $k$, min-corr & 3 & Training Sharpe optimum; confirmed on train+validation; risk control & \citet{markowitz1952}, Prop.~\ref{prop:mincorr} \\
+\midrule
+Defensive assets & TLT+IEF (cond.) & Captures duration only when bond momentum $\geq 0$ & \citet{barroso2015} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%-------------------------------------------------------------
+\subsection{The Resulting Strategy: Garcia Adaptive Triplet}
+\label{sec:s36}
+%-------------------------------------------------------------
+
+Applying the four rules yields the \textbf{Garcia Adaptive Triplet} (\textbf{GAT}) strategy, named for its adaptive breadth-based regime switch and its three-asset minimum-correlation offensive portfolio. The complete monthly decision
+procedure, executed at each month-end $t$ for implementation on the first business
+day of month $t+1$, is:
+
+\begin{enumerate}
+    \item \textbf{Momentum ranking.} Compute $M_{i,t}^{\text{13612U}}$
+          (Equation~\ref{eq:momentum}) for all 15 risky assets; keep the top 7.
+    \item \textbf{Absolute filter.} Retain only assets with $M_{i,t} \geq 2\%$ to
+          form $\mathcal{A}_t^+$ (Equation~\ref{eq:eligible}).
+    \item \textbf{Portfolio / regime.}
+          \begin{itemize}
+              \item If $|\mathcal{A}_t^+| \geq 3$: hold the minimum-correlation
+                    triplet (Equation~\ref{eq:triplet}), weight $1/3$ each.
+              \item If $|\mathcal{A}_t^+| < 3$: hold the defensive allocation
+                    (Equation~\ref{eq:defensive}).
+          \end{itemize}
+\end{enumerate}
+
+The strategy is fully rule-based; it uses no discretionary input, no leverage, and
+no derivatives. The base case ignores transaction costs; robustness to realistic
+costs is assessed in Section~\ref{sec:robustness}.
+
+%-------------------------------------------------------------
+\subsection{Performance Metrics}
+\label{sec:metrics}
+%-------------------------------------------------------------
+
+Let $r_t$ denote the monthly portfolio return and $r_{f,t}$ the monthly 3-month
+U.S.\ Treasury Bill return. Risk-adjusted metrics use monthly excess returns
+$x_t = r_t - r_{f,t}$.
+
+\begin{align}
+\text{CAGR} &= \left(\prod_{t=1}^{T}(1 + r_t)\right)^{12/T} - 1 \label{eq:cagr} \\[4pt]
+\text{Sharpe} &= \frac{\sqrt{12}\,\bar{x}}{\sigma_x} \label{eq:sharpe} \\[4pt]
+\text{Sortino} &= \frac{\sqrt{12}\,\bar{x}}{\sqrt{\frac{1}{T-1}\sum_{t=1}^{T}\min(x_t,0)^2}} \label{eq:sortino} \\[4pt]
+\text{Max DD} &= \min_{t} \frac{V_t - \max_{s \leq t} V_s}{\max_{s \leq t} V_s} \label{eq:maxdd}
+\end{align}
+
+where $\bar{x}$ and $\sigma_x$ are the sample mean and standard deviation of
+monthly excess returns and $V_t$ is the portfolio value at month $t$. Drawdowns
+are measured on end-of-month values.
+
+%-------------------------------------------------------------
+\subsection{Benchmarks}
+\label{sec:benchmarks}
+%-------------------------------------------------------------
+
+We compare GAT against four benchmarks:
+\begin{enumerate}
+    \item \textbf{$1/N$ \citep{demiguel2009}}: equal allocation across the 15 risky
+          ETFs, rebalanced monthly. \citet{demiguel2009} show this naive rule is
+          hard to beat out-of-sample; it is our primary benchmark.
+    \item \textbf{60/40}: 60\% SPY + 40\% IEF, rebalanced monthly, the standard
+          multi-asset reference.
+    \item \textbf{Faber (2007)}: each ETF held equally if its month-end price
+          exceeds its 10-month moving average, else the corresponding weight goes
+          to BIL \citep{faber2007}, a pure trend peer.
+    \item \textbf{S\&P~500 (SPY) buy-and-hold}: the passive equity ceiling.
+\end{enumerate}
+Statistical comparisons use the paired circular block bootstrap ($b = 6$ months,
+$B = 10{,}000$) for Sharpe-ratio differences and Newey--West HAC spanning
+regressions for alphas; the same transaction-cost schedule is applied to
+GAT and to every benchmark (net versus net).
+All Newey--West regressions use $q = 6$ lags throughout the paper (the same
+constant across all windows and models), a conservative choice relative to the
+rule-of-thumb $\lfloor T^{1/4} \rfloor \approx 4$ for the 60-month test block,
+which if anything widens the standard errors and raises the p-values relative to
+the rule-of-thumb. Sharpe-difference p-values are robust to block lengths $b \in
+\{3,6,12\}$ (see Section~\ref{sec:res_oos}).
+
+%-------------------------------------------------------------
+\subsection{Robustness Checks}
+\label{sec:robustness}
+%-------------------------------------------------------------
+
+Robustness is assessed through:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Skill-versus-luck attribution.} For each rule we replace its
+          informed decision with a random decision drawn from the same feasible
+          set at the same frequency (a matched permutation, $N_{\text{sim}} =
+          2{,}000$), and test whether the realised Sharpe exceeds the random
+          baseline. Only the momentum rule and the minimum-correlation rule beat
+          their matched baseline (Section~\ref{sec:results}).
+    \item \textbf{Nested incremental spanning-alpha ladder.} A sequence of nested
+          models switches on one rule at a time; the Newey--West spanning alpha of
+          each model on the previous one isolates that rule's marginal
+          contribution.
+    \item \textbf{Full-period statistical battery.} Lo (2002) Sharpe standard
+          errors and bootstrap CIs, Newey--West HAC tests of the mean excess
+          return, Sharpe-difference bootstraps, and CAPM / two-factor / $1/N$
+          spanning alphas, on the test block, the post-training sample, and the
+          full sample.
+    \item \textbf{Transaction costs.} A proportional model on drift-adjusted
+          turnover \citep{demiguel2009}, applied identically to all benchmarks,
+          with a break-even cost analysis and lower-turnover variants.
+    \item \textbf{Construction alternatives.} Holding Rules~1--3 fixed, we replace
+          the minimum-correlation rule with a long-only minimum-variance portfolio,
+          a risk-parity (inverse-volatility) portfolio, and other constructions over
+          the eligible set, to test whether optimised weights dominate the
+          equal-weight minimum-correlation triplet (Section~\ref{sec:res_construction}).
+    \item \textbf{Deflated Sharpe sensitivity.} The \citet{bailey2014} Deflated
+          Sharpe ratio is reported across a range of assumed trial counts, since the
+          number of configurations explored is itself a modelling choice.
+\end{enumerate}

@@ -1,0 +1,121 @@
+% ============================================================
+% Cover letter — submission to International Review of Economics & Finance
+% Paper: "Momentum, Breadth, and Correlation in Tactical Asset Allocation:
+%         A Rule-by-Rule Attribution"
+% Authors: Garcia Martin I., Mases Campos M., Prior Sanz F. (corresponding)
+% Standalone — compiles on its own (no bibliography needed).
+% ============================================================
+\documentclass[11pt,a4paper]{letter}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{parskip}
+
+\signature{Francesc Prior Sanz\\\textit{on behalf of all authors}}
+\address{IQS School of Engineering\\Universitat Ramon Llull\\Via Augusta 390\\08017 Barcelona, Spain}
+
+\begin{document}
+
+\begin{letter}{The Editor\\\textit{International Review of Economics \& Finance}\\Elsevier}
+
+\opening{Dear Editor,}
+
+\onehalfspacing
+
+We are pleased to submit our manuscript, \textbf{``Momentum, Breadth, and
+Correlation in Tactical Asset Allocation: A Rule-by-Rule Attribution,''} for
+consideration for publication in the \textit{International Review of Economics \& Finance}.
+
+Rule-based tactical asset allocation (TAA) strategies are popular because they are
+transparent: a few explicit rules (a momentum signal, a ranking cutoff, an
+absolute-trend filter, a portfolio-construction criterion) drive the allocation,
+rather than an opaque optimiser. Yet that very transparency exposes a question the
+literature rarely answers directly: among the several rules a typical strategy
+stacks, \emph{which} ones actually generate the out-of-sample edge, which are
+inert, and is the result anything more than a repackaged trend premium? Without an
+answer, a favourable backtest is hard to distinguish from the product of a
+parameter search. The data-snooping literature typically delivers a single
+corrected verdict on a \emph{strategy}; it less often asks \emph{which rule within
+it} carries the edge. Our paper brings the two together.
+
+We take one concrete cross-asset momentum strategy (a monthly rotation across 15
+diversified ETFs, with no leverage, derivatives, or discretion) and treat it as a
+case study. Every parameter is derived on a 2004--2015 training window and confirmed
+on a 2016--2020 validation window, and the frozen strategy is evaluated once on a
+locked 2021--2025 test block. We then decompose the out-of-sample performance
+\emph{rule by rule}. The paper makes three contributions:
+
+\begin{enumerate}\setlength{\itemsep}{2pt}
+\item \textbf{A transparent, two-pronged attribution of the edge.} A matched
+  ``skill-versus-luck'' permutation test replaces each rule's informed decision
+  with a random draw from the same feasible set and finds that the momentum
+  rule beats its matched random baseline on the Sharpe ratio ($p=0.0025$), while the
+  minimum-correlation rule contributes through variance reduction ($p=0.010$) rather
+  than in-sample return. A nested incremental spanning-alpha ladder then shows the edge
+  arises from \emph{stacking} complementary rules, not from any single proprietary
+  mechanism.
+\item \textbf{The economic role of minimum-correlation construction.} We give the
+  rule a formal optimality footing (it is the minimum-variance equal-weight
+  portfolio under homogeneous screened returns) but show empirically that its value
+  is \emph{risk control}, not return: it reduces variance and tail risk at
+  statistically equal expected return. A head-to-head comparison against
+  optimised constructions over the same eligible set shows that a long-only
+  minimum-variance and an inverse-volatility risk-parity portfolio achieve
+  comparable drawdowns but lower return and Sharpe, and neither beats the
+  equal-weight minimum-correlation triplet, which captures the diversification
+  benefit while avoiding the estimation error of covariance-matrix inversion.
+\item \textbf{Robustness along every axis a referee is likely to probe.} The edge
+  survives a significant spanning alpha against naive $1/N$ (locked test $+6.88\%$
+  per annum, $p=0.008$); a residual alpha of $\approx +5\%$ per annum against
+  joint controls for the equity, duration, and a generic trend (time-series
+  momentum) factor built from the same assets, so it is not reducible to
+  trend-following; realistic transaction costs; a Deflated Sharpe adjustment for
+  the search; both sample halves; and a replication on 100\% real (non-proxy) ETF
+  data ($+6.04\%$/yr, $p=0.0001$).
+\end{enumerate}
+
+We believe the paper fits the scope of the \textit{International Review of
+Economics \& Finance}, which regularly publishes applied work on asset allocation,
+momentum, and the empirical evaluation of investment strategies. Its methodological
+contribution (a constructive, per-rule defence against the data-snooping
+critique) should be of interest to readers beyond the specific strategy studied.
+
+In the interest of a fair review, we are explicit about three limitations and how
+we address each in the manuscript. \emph{First}, on \textbf{data snooping}: rather
+than rest on a single corrected statistic, we localise the edge with a permutation
+test and a nested spanning ladder (with bootstrap confidence intervals that make the
+limited per-rule power explicit), and we report a Deflated Sharpe sensitivity table showing that the DSR
+clears the 0.95 threshold at the actual trial count ($N=24$,
+$\mathrm{DSR}=0.975$) and for any assumed count up to $N\approx154$; the primary defence against data snooping is nonetheless
+the out-of-sample alpha and the matched-permutation attribution. \emph{Second}, on \textbf{transaction costs}: the strategy's
+turnover is non-trivial ($\approx 10\times$ per year), so we evaluate net-of-cost
+performance against the same cost schedule applied to all benchmarks and report a
+break-even cost ($\approx 62$ bps one-way, roughly six times a realistic ETF cost),
+together with a no-trade-band variant that lowers turnover while preserving the
+alpha. \emph{Third}, on \textbf{benchmarks}: we state openly that the strategy does
+\emph{not} beat a 60/40 portfolio on a risk-adjusted (Sharpe) basis; its
+documented advantage is over naive $1/N$ and a Faber (2007) trend rule, and its
+distinctive feature is materially lower drawdown (roughly half that of $1/N$,
+60/40, and the S\&P~500). We prefer to make these points ourselves rather than
+leave them for a referee to discover.
+
+We confirm that this manuscript is original, has not been published previously, and
+is not under consideration for publication elsewhere. All authors have approved the
+submission and there are no conflicts of interest to declare. The strategy and all
+empirical results derive from systematic, reproducible code; data-construction
+choices and their limitations are documented in the manuscript.
+
+Thank you for considering our work. We would be glad to respond to any questions and
+look forward to the reviewers' feedback.
+
+\closing{Sincerely,}
+
+\vspace{1em}
+\textit{Ignasi Garcia Martin \quad\textbullet\quad Marc Mases Campos
+\quad\textbullet\quad Francesc Prior Sanz (corresponding author)}\\
+IQS School of Engineering, Universitat Ramon Llull\\
+Corresponding author: \texttt{francesc.prior@iqs.url.edu}
+
+\end{letter}
+\end{document}

@@ -1,0 +1,53 @@
+% ============================================================
+\appendix
+\section{Proxy Construction and Data Quality}
+\label{app:data}
+% ============================================================
+
+Table~\ref{tab:proxydetail} documents, for each of the 15 risky ETFs, the data
+source used to extend the series back to 2003, the calibration $R^2$ against the
+realised ETF over the overlapping sample, and the splice window. Six ETFs have real
+history covering the training window and need no proxy; three are tracked by their exact
+underlying index; the remainder are OLS-calibrated correlated instruments spliced at
+the ETF launch date (Section~\ref{sec:data}). Every proxied series uses an exact index
+or a source with $R^2 \geq 0.92$, the only sub-$0.90$ segment being REM's 2003--2006
+basket, which rarely enters the triplet; the robustness check in
+Section~\ref{sec:res_robustness} confirms the edge does not depend on the proxies.
+
+\begin{table}[H]
+\centering
+\caption{Pre-ETF data source, calibration quality, and splice window by asset}
+\label{tab:proxydetail}
+\small
+\begin{tabular}{llp{6.0cm}cl}
+\toprule
+ETF & Class & Pre-ETF source (2003--launch) & $R^2$ & Tier \\
+\midrule
+SPY, QQQ, EWJ, & \multirow{2}{*}{Equity/FI} & \multirow{2}{*}{Real ETF over the full sample (no proxy)} & \multirow{2}{*}{n.a.} & \multirow{2}{*}{Real} \\
+EEM, IEF, TLT  &           &                                          &      &       \\
+\midrule
+SCZ & Eq.\ (intl SC) & MSCI EAFE Small Cap Net TR index (exact underlying, from 2000) & exact & Exact index \\
+VNQ & Real estate    & MSCI US REIT index (exact underlying)            & exact & Exact index \\
+GLD & Commodity      & Gold spot price                                  & $0.99$ & Near-exact \\
+BIL & Cash           & 3-month T-bill (FRED TB3MS)                       & n.a.  & Near-exact \\
+VGK & Eq.\ (Europe)  & Basket of six EU country ETFs (EWU, EWG, EWQ, EWL, EWN, EWI) & $0.96$ & Calibrated \\
+DBC & Commodity      & S\&P GSCI Total Return index (exact DBIQ-OY only from 2011) & $0.92$ & Calibrated \\
+REM & Mortgage REIT  & NLY+MFA+RWT basket (2003--06) $\to$ FTSE NAREIT Mortgage index (2006--07) & $0.80$--$0.94$ & Calibrated (chained) \\
+TIP & TIPS           & Real-yield constant-maturity TR (11 months only, before usable momentum) & $0.40$ & Calibrated (minor) \\
+BWX & Intl bond      & T.\ Rowe Price International Bond fund (RPIBX, since 1986) & $0.94$ & Calibrated \\
+RWX & Intl REIT      & DJ Global ex-US Select RESI index (exact underlying)  & exact & Exact index \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\footnotesize
+Note: bond ETFs are reconstructed from yields via a constant-maturity total-return
+formula ($R^2>0.99$ against the realised ETF). The exact diversified DBIQ-OY index for
+DBC (only from 2011 in our feed) and the exact mortgage-REIT total-return index for
+REM before 2006 require a Bloomberg terminal; we use the S\&P GSCI and a three-name
+basket respectively. The calibration look-ahead these proxies imply (their overlap with
+the ETF falls partly in the out-of-sample window) is bounded and addressed in
+Section~\ref{sec:res_robustness}: dropping BWX and RWX leaves the post-training alpha at
+$+5.57\%$/yr ($p=0.0066$), and running the strategy on 100\% real ETF data (no proxies,
+2009--2025) yields essentially the same alpha ($+6.04\%$/yr, $p=0.0001$).
+\end{flushleft}
+\end{table}
