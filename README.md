@@ -15,7 +15,6 @@ train / validation / test protocol.
 main.tex              Manuscript (Elsevier elsarticle class)
 sections/             Manuscript sections (01 introduction … 07 appendix)
 paper.bib             Bibliography
-COVER_LETTER.tex      Submission cover letter
 figures/              Figures used in the manuscript
 code/                 Reproduction pipeline
 data/prices/          Input price series and risk-free rate
